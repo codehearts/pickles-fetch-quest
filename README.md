@@ -19,8 +19,8 @@ pip install -r requirements-dev.txt # To install development packages as well
 Pickle's Fetch Quest uses flake8 to maintain PEP 8 compliance. Run `flake8` on the project directory when contributing to ensure your code maintains these guidelines. Tests are written using Python's `unittest` module.
 
 ```bash
-flake8 ./       # Lint
-python tests.py # Run tests
+flake8             # Lint codebase
+python -m unittest # Run tests
 ```
 
 [coverage-badge]: https://codecov.io/gh/codehearts/pickles-fetch-quest/branch/master/graph/badge.svg
