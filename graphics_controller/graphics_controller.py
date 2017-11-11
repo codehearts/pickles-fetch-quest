@@ -2,8 +2,11 @@ import pyglet.window
 
 
 class GraphicsController(object):
+    """Controller for graphical output to a desktop window.
+    """
+
     def __init__(self, width, height, title=None, resizable=False):
-        """Opens a desktop window and provides an interface to render graphics.
+        """Creates a blank desktop window.
 
         Args:
             width (int): The width of the window.
