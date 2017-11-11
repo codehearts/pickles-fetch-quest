@@ -4,6 +4,6 @@ python:
 install:
   - pip install -r requirements-dev.txt
 script:
-  - coverage run tests.py
+  - coverage run -m unittest
 after_success:
   - codecov
