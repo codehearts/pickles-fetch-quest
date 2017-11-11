@@ -11,7 +11,7 @@ Install dependencies with pip and run `pickles-fetch-quest.py` to play!
 ```bash
 pip install -r requirements.txt     # To install only packages needed to play
 pip install -r requirements-dev.txt # To install development packages as well
-./pickles-fetch-quest.py            # Let's play!
+python pickles-fetch-quest.py       # Let's play!
 ```
 
 ## Development
