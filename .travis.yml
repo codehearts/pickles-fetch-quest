@@ -1,6 +1,8 @@
 language: python
 python:
   - 3.6.3
+env:
+  - PYGLET_SHADOW_WINDOW=False
 install:
   - pip install -r requirements-dev.txt
 script:
