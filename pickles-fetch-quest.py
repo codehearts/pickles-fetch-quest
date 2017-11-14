@@ -1,6 +1,4 @@
-from graphics_controller import GraphicsController, GraphicsObject
-from disk_loader import DiskLoader
-from game_objects import Tile
+from engine import DiskLoader, GraphicsController, GraphicsObject, Tile
 import pyglet.app
 
 DiskLoader.set_resource_paths(['resources/'])
