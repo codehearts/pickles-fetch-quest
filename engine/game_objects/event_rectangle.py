@@ -1,4 +1,4 @@
-from .rectangle import Rectangle
+from ..geometry import Rectangle
 
 
 class EventRectangle(Rectangle):
