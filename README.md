@@ -16,7 +16,7 @@ python pickles-fetch-quest.py       # Let's play!
 
 ## Development
 
-Pickle's Fetch Quest uses flake8 to maintain PEP 8 compliance. Run `flake8` on the project directory when contributing to ensure your code maintains these guidelines. Tests are written using Python's `unittest` module.
+Pickle's Fetch Quest uses flake8 to maintain PEP 8 compliance. Run `flake8` on the project directory when contributing to ensure your code follows these guidelines. Tests are written using Python's `unittest` module.
 
 ```bash
 flake8             # Lint codebase

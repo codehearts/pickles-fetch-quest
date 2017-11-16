@@ -28,9 +28,9 @@ class GraphicsObject(object):
                         'default':   idle_image,
                         'activated': activated_image
                     }
-            x (int, options): The x coordinate for the graphic's left edge.
+            x (int, optional): The x coordinate for the graphic's left edge.
                 Defaults to 0.
-            y (int, options): The y coordinate for the graphic's bottom edge.
+            y (int, optional): The y coordinate for the graphic's bottom edge.
                 Defaults to 0.
             batch (:obj:`pyglet.graphics.Batch`, optional): The batch to render
                 this graphic with. Defaults to None.
