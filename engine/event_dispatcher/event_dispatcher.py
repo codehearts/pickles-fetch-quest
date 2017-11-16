@@ -7,7 +7,7 @@ class EventDispatcher(pyglet.event.EventDispatcher):
     Any class which inherits from :cls:`EventDispatcher` provides an interface
     for other objects to be notified of object-specific events.
 
-    If an event listener is attached for an event which has not been registered,
+    If an event listener is attached for an event that has not been registered,
     a :cls:`EventException` will be raised.
     """
 
