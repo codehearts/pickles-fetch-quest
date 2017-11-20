@@ -12,4 +12,5 @@ class TestRectangle(unittest.TestCase):
         self.assertEqual(2, rect.y)
         self.assertEqual(3, rect.width)
         self.assertEqual(4, rect.height)
-        self.assertEqual((1, 2), rect.position)
+        self.assertEqual(1, rect.coordinates.x)
+        self.assertEqual(2, rect.coordinates.y)
