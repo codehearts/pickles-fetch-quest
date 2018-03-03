@@ -30,6 +30,36 @@ class TestPhysics2d(unittest.TestCase):
         physics.run_simulation(1000)
         self.assertPoint((4, 4), physics.velocity)
 
+    def test_assign_velocity(self):
+        """Assigning velocity changes velocity accordingly."""
+        physics = Physics2d(mass=1, velocity=(0, 0), acceleration=(2, 2),
+                            gravity=(3, 3), terminal_velocity=(100, 100))
+        physics.run_simulation(500)  # (0 + 2.5 = 2.5, 0 + 2.5 = 2.5)
+        self.assertPoint((2, 2), physics.velocity)  # 2 from int rounding
+
+        physics.velocity.x = 5
+        physics.run_simulation(500)  # (5 + 2.5 = 7.5, 2.5 + 2.5 = 5)
+        self.assertPoint((7, 5), physics.velocity)  # 7 from int rounding
+
+        physics.velocity.y = 7
+        physics.run_simulation(500)  # (7.5 + 2.5 = 10, 7 + 2.5 = 9.5)
+        self.assertPoint((10, 9), physics.velocity)  # 9 from int rounding
+
+    def test_assign_acceleration(self):
+        """Assigning acceleration changes velocity accordingly."""
+        physics = Physics2d(mass=1, velocity=(0, 0), acceleration=(2, 2),
+                            gravity=(3, 3), terminal_velocity=(100, 100))
+        physics.run_simulation(500)  # (0 + 2.5 = 2.5, 0 + 2.5 = 2.5)
+        self.assertPoint((2, 2), physics.velocity)  # 2 from int rounding
+
+        physics.acceleration.x = 4
+        physics.run_simulation(500)  # (2.5 + 3.5 = 6, 2.5 + 2.5 = 5)
+        self.assertPoint((6, 5), physics.velocity)
+
+        physics.acceleration.y = 4
+        physics.run_simulation(500)  # (6 + 3.5 = 9.5, 5 + 3.5 = 8.5)
+        self.assertPoint((9, 8), physics.velocity)  # 9, 8 from int rounding
+
     # Tests for acceleration with gravitational pull
 
     def test_simulate_positive_x(self):

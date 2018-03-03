@@ -44,6 +44,12 @@ class Physics2d(object):
         Args:
             ms (int): The number of milliseconds to run the simulation for.
         """
+        # Ensure high resolution velocity matches the current velocity
+        if (self._velocity_1000.x // 1000) != self.velocity.x:
+            self._velocity_1000.x = self.velocity.x * 1000
+        if (self._velocity_1000.y // 1000) != self.velocity.y:
+            self._velocity_1000.y = self.velocity.y * 1000
+
         self._velocity_1000 += ((self.acceleration + self._gravity) *
                                 self._mass * ms)
         self.velocity = self._velocity_1000 // 1000
