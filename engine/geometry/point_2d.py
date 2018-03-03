@@ -20,6 +20,29 @@ class Point2d(object):
         self.x = x
         self.y = y
 
+    def set(self, other):
+        """Sets this point from another object.
+
+        If `other` is another :cls:`Point2d`, the x and y coordinates will be
+        assigned to the x and y coordinates of the other point.
+
+        If `other` is an iterable, the first index is assigned to the x
+        coordinate and the second index is assigned to the y coordinate.
+
+        If `other` is a number, both coordinates will be assigned to it.
+
+        Args:
+            other (:obj:`Object`): The value to assign this point to.
+        """
+        try:
+            self.x, self.y = other.x, other.y
+        except AttributeError:
+            try:
+                self.x, self.y = other[0], other[1]
+            except TypeError:
+                self.x = other
+                self.y = other
+
     def _call_with_other(self, fn, other):
         """Calls a function for both coordinates with another object.
 
@@ -66,7 +89,7 @@ class Point2d(object):
     def __add__(self, other):
         """Adds to the x and y coordinates.
 
-        If `other` is another :cls:`Point`, the x and y coordinates will be
+        If `other` is another :cls:`Point2d`, the x and y coordinates will be
         summed with the x and y coordinates of the other point respectively.
 
         If `other` is an iterable, the first index is added to the x
@@ -82,7 +105,7 @@ class Point2d(object):
     def __mul__(self, other):
         """Multiplies the x and y coordinates by the value.
 
-        If `other` is another :cls:`Point`, the x and y coordinates will be
+        If `other` is another :cls:`Point2d`, the x and y coordinates will be
         multiplied by the x and y coordinates of the other point respectively.
 
         If `other` is an iterable, the x coordinate is multiplied by the first
@@ -98,7 +121,7 @@ class Point2d(object):
     def __floordiv__(self, other):
         """Divides the x and y coordinates by the value, flooring the result.
 
-        If `other` is another :cls:`Point`, the x and y coordinates will be
+        If `other` is another :cls:`Point2d`, the x and y coordinates will be
         divided by the x and y coordinates of the other point respectively.
 
         If `other` is an iterable, the x coordinate is divided by the first

@@ -19,6 +19,30 @@ class TestPoint2d(unittest.TestCase):
         self.assertEqual(1, point.x)
         self.assertEqual(2, point.y)
 
+    def test_point_scalar_set(self):
+        """Calling ``set`` method with scalar updates x and y attributes."""
+        point = Point2d(0, 0)
+        other = 2
+        point.set(other)
+        self.assertEqual(2, point.x)
+        self.assertEqual(2, point.y)
+
+    def test_point_vector_set(self):
+        """Calling ``set`` method with vector updates x and y attributes."""
+        point = Point2d(0, 0)
+        other = (1, 2)
+        point.set(other)
+        self.assertEqual(1, point.x)
+        self.assertEqual(2, point.y)
+
+    def test_point_set(self):
+        """Calling ``set`` method with point updates x and y attributes."""
+        point = Point2d(0, 0)
+        other = Point2d(1, 2)
+        point.set(other)
+        self.assertEqual(1, point.x)
+        self.assertEqual(2, point.y)
+
     def test_point_scalar_equality(self):
         """Point is equal to scalar when both coordinates are equal to it."""
         equal_point = Point2d(0, 0)
