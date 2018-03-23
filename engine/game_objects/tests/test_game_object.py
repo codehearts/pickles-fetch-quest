@@ -20,7 +20,8 @@ class TestGameObject(unittest.TestCase):
 
     def setUp(self):
         geometry_states = {
-            'default': Rectangle(x=1, y=2, width=3, height=4)
+            'default': Rectangle(x=1,  y=2,  width=3,  height=4),
+            'x10':     Rectangle(x=10, y=20, width=30, height=40),
         }
 
         self.on_move = Mock()
@@ -42,6 +43,17 @@ class TestGameObject(unittest.TestCase):
         self.assertEqual(6, game_object.y)
         self.assertEqual(3, game_object.width)
         self.assertEqual(4, game_object.height)
+
+    def test_coordinates_are_read_only(self):
+        """Coordinates are read-only."""
+        with self.assertRaises(AttributeError):
+            self.game_object.coordinates = (100, 200)
+        self.game_object.coordinates.x = 300
+        self.game_object.coordinates.y = 400
+        self.assertEqual(1, self.game_object.x)
+        self.assertEqual(2, self.game_object.y)
+        self.assertEqual(1, self.game_object.coordinates.x)
+        self.assertEqual(2, self.game_object.coordinates.y)
 
     def test_set_x(self):
         """Setting x coordinate triggers an on_move event."""
@@ -117,3 +129,16 @@ class TestGameObject(unittest.TestCase):
         self.assertEqual(1 + 4, self.game_object.x)
         self.assertEqual(2 + 8, self.game_object.y)
         self.physics.run_simulation.assert_called_once_with(1000)
+
+    def test_set_geometry_state(self):
+        """Setting geometry state updates dimensions but not coordinates."""
+        self.assertEqual(1, self.game_object.x)
+        self.assertEqual(2, self.game_object.y)
+        self.assertEqual(3, self.game_object.width)
+        self.assertEqual(4, self.game_object.height)
+
+        self.game_object.set_geometry_state('x10')
+        self.assertEqual(1, self.game_object.x)
+        self.assertEqual(2, self.game_object.y)
+        self.assertEqual(30, self.game_object.width)
+        self.assertEqual(40, self.game_object.height)

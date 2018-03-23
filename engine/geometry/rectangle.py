@@ -22,16 +22,21 @@ class Rectangle(object):
             height (int): The height of the rectangle.
         """
         super(Rectangle, self).__init__()
-        self.coordinates = Point2d(x, y)
+        self._coordinates = Point2d(x, y)
         self.width = width
         self.height = height
 
     @property
+    def coordinates(self):
+        """Returns the coordinates of the rectangle."""
+        return self._coordinates
+
+    @property
     def x(self):
         """Returns the x coordinate of rectangle."""
-        return self.coordinates.x
+        return self._coordinates.x
 
     @property
     def y(self):
         """Returns the y coordinate of rectangle."""
-        return self.coordinates.y
+        return self._coordinates.y
