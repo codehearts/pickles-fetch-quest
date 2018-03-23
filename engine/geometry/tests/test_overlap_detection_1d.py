@@ -1,4 +1,4 @@
-from ..detect_overlap_1d import detect_overlap_1d
+from ..overlap_detection_1d import detect_overlap_1d
 import unittest
 
 
