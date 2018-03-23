@@ -31,5 +31,6 @@ def on_draw():
     tile_graphic._sprite.draw()
     physics_graphic._sprite.draw()
 
+
 if __name__ == "__main__":
     pyglet.app.run()
