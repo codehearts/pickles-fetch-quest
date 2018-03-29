@@ -10,6 +10,7 @@ class TestGameObject(unittest.TestCase):
     Each test case is provided the following properties::
 
         self.on_move: The listener mock for the object's on_move event.
+        self.on_collision: Listener mock for the object's on_collision event.
         self.physics: The mock for the object's physics.
         self.game_object: A GameObject at (1,2) with geometry states:
 
@@ -20,14 +21,17 @@ class TestGameObject(unittest.TestCase):
 
     def setUp(self):
         geometry_states = {
-            'default': Rectangle(x=1, y=2, width=3, height=4)
+            'default': Rectangle(x=1,  y=2,  width=3,  height=4),
+            'x10':     Rectangle(x=10, y=20, width=30, height=40),
         }
 
+        self.on_collision = Mock()
         self.on_move = Mock()
         self.physics = Mock()
         self.game_object = GameObject(geometry_states, x=1, y=2,
                                       physics=self.physics)
-        self.game_object.add_listeners(on_move=self.on_move)
+        self.game_object.add_listeners(on_move=self.on_move,
+                                       on_collision=self.on_collision)
 
     def test_create_game_object(self):
         """Creates a GameObject and verifies its attributes."""
@@ -42,6 +46,17 @@ class TestGameObject(unittest.TestCase):
         self.assertEqual(6, game_object.y)
         self.assertEqual(3, game_object.width)
         self.assertEqual(4, game_object.height)
+
+    def test_coordinates_are_read_only(self):
+        """Coordinates are read-only."""
+        with self.assertRaises(AttributeError):
+            self.game_object.coordinates = (100, 200)
+        self.game_object.coordinates.x = 300
+        self.game_object.coordinates.y = 400
+        self.assertEqual(1, self.game_object.x)
+        self.assertEqual(2, self.game_object.y)
+        self.assertEqual(1, self.game_object.coordinates.x)
+        self.assertEqual(2, self.game_object.coordinates.y)
 
     def test_set_x(self):
         """Setting x coordinate triggers an on_move event."""
@@ -117,3 +132,22 @@ class TestGameObject(unittest.TestCase):
         self.assertEqual(1 + 4, self.game_object.x)
         self.assertEqual(2 + 8, self.game_object.y)
         self.physics.run_simulation.assert_called_once_with(1000)
+
+    def test_set_geometry_state(self):
+        """Setting geometry state updates dimensions but not coordinates."""
+        self.assertEqual(1, self.game_object.x)
+        self.assertEqual(2, self.game_object.y)
+        self.assertEqual(3, self.game_object.width)
+        self.assertEqual(4, self.game_object.height)
+
+        self.game_object.set_geometry_state('x10')
+        self.assertEqual(1, self.game_object.x)
+        self.assertEqual(2, self.game_object.y)
+        self.assertEqual(30, self.game_object.width)
+        self.assertEqual(40, self.game_object.height)
+
+    def test_notify_collision_with(self):
+        """Notifying collision dispatches on_collision event."""
+        other_mock = Mock()
+        self.game_object.notify_collision_with(other_mock)
+        self.on_collision.assert_called_once_with(other_mock)

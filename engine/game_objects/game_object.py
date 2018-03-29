@@ -1,8 +1,8 @@
 from ..event_dispatcher import EventDispatcher
-from ..geometry import Point2d
+from ..geometry import Point2d, Rectangle
 
 
-class GameObject(EventDispatcher):
+class GameObject(Rectangle, EventDispatcher):
     """Game object with support for event dispatching.
 
     See :cls:`event_dispatcher.EventDispatcher` for usage information on the
@@ -11,6 +11,8 @@ class GameObject(EventDispatcher):
     Attributes:
         x (int): The x coordinate of the left edge of the object's geometry.
         y (int): The y coordinate of the bottom edge of the object's geometry.
+        coordinates (:obj:`Point2d`): The coordinates for the bottom left edge
+                                      of the object's geometry. Read-only.
         width (int): The width of the object's geometry.
         height (int): The height of the object's geometry.
         physics (:obj:`Physics2d`): Physics that the object obeys on update.
@@ -18,6 +20,8 @@ class GameObject(EventDispatcher):
     Events:
         on_move: The x or y coordinates of the object's geometry have changed.
             A tuple of the x and y coordinates will be passed to the listeners.
+        on_collision: The object's geometry overlapped with another object.
+            The other object will be passed to the listeners.
     """
 
     def __init__(self, geometry_states, x=0, y=0, physics=None):
@@ -45,13 +49,16 @@ class GameObject(EventDispatcher):
         Raises:
             KeyError: If ``geometry_states`` was missing the 'default' state.
         """
-        super(GameObject, self).__init__()
+        super(GameObject, self).__init__(x, y,
+                                         geometry_states['default'].width,
+                                         geometry_states['default'].height)
+        self.register_event_type('on_collision')
         self.register_event_type('on_move')
 
         self._geometry_states = geometry_states
-        self._geometry = geometry_states['default']
-        self._coordinates = Point2d(x, y)
         self.physics = physics
+
+        self.set_geometry_state('default')
 
     def set_position(self, coordinates):
         """Sets the x and y coordinates of the object at the same time.
@@ -60,8 +67,26 @@ class GameObject(EventDispatcher):
             coordinates (tuple of int): A tuple of the x and y coordinates.
         """
         if self._coordinates != coordinates:
-            self._coordinates.x, self._coordinates.y = coordinates
+            self._coordinates.set(coordinates)
             self.dispatch_event('on_move', (self.x, self.y))
+
+    def notify_collision_with(self, other):
+        """Dispatches an ``on_collision`` event with the other object.
+
+        Args:
+            other (:obj:`GameObject`): The object this one overlapped with.
+        """
+        self.dispatch_event('on_collision', other)
+
+    def set_geometry_state(self, state_name):
+        """Sets the geometry of the object to the state with the given name.
+
+        Args:
+            state_name (str): The name of the geometry state to switch to.
+        """
+        state = self._geometry_states[state_name]
+        self.width = state.width
+        self.height = state.height
 
     def update(self, ms):
         """Updates the position and state of the game object based on time.
@@ -73,6 +98,14 @@ class GameObject(EventDispatcher):
             self.physics.run_simulation(ms)
             self.set_position((self.x + self.physics.velocity.x,
                                self.y + self.physics.velocity.y))
+
+    @property
+    def coordinates(self):
+        """Returns the coordinates of the object's bottom left edge.
+
+        This property is read-only. Use ``set_position`` to set it.
+        """
+        return Point2d(self._coordinates.x, self._coordinates.y)
 
     @property
     def x(self):
@@ -97,13 +130,3 @@ class GameObject(EventDispatcher):
         if self._coordinates.y != value:
             self._coordinates.y = value
             self.dispatch_event('on_move', (self.x, self.y))
-
-    @property
-    def width(self):
-        """Returns the width of the object's geometry."""
-        return self._geometry.width
-
-    @property
-    def height(self):
-        """Returns the height of the object's geometry."""
-        return self._geometry.height
