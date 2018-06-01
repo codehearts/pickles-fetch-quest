@@ -8,6 +8,9 @@ DiskLoader.set_resource_paths(['resources/'])
 pickle_graphics = GraphicsController(160, 140, title="Pickle's Fetch Quest")
 collision_resolver = CollisionResolver2d()
 
+collision_sound = DiskLoader.load_audio(
+    'audio/sfx/bass-drum-hit.wav', streaming=False)
+
 tile_image = DiskLoader.load_image('tiles/test.gif')
 
 tile_geometry_states = {
