@@ -27,3 +27,22 @@ class DiskLoader(object):
             A :obj:`pyglet.image.Texture` for the loaded image.
         """
         return pyglet.resource.image(filename)
+
+    @classmethod
+    def load_audio(cls, filename, streaming=True):
+        """Loads an audio file from disk.
+
+        Args:
+            filename (:obj:`str`): The name of the audio file, relative to
+                the resource path.
+
+        Kwargs:
+            streaming (bool, optional): True to stream audio from disk rather
+                than loading the entire audio file into memory. Only one
+                instance of a streaming audio file can be played at once.
+                Use this for longer audio files.
+
+        Returns:
+            A :obj:`pyglet.media.Source` for the loaded audio.
+        """
+        return pyglet.resource.media(filename, streaming=streaming)
