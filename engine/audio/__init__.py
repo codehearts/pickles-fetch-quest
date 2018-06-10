@@ -1,4 +1,4 @@
-from .audio_player import AudioPlayer
+from .audio_source import AudioSource
 from .exceptions import DuplicateAudioStreamException
 
-__all__ = ['AudioPlayer', 'DuplicateAudioStreamException']
+__all__ = ['AudioSource', 'DuplicateAudioStreamException']

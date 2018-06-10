@@ -1,4 +1,4 @@
-from .audio import AudioPlayer
+from .audio import AudioSource
 from .graphics_controller import GraphicsController, GraphicsObject
 from .disk_loader import DiskLoader
 from .geometry import Rectangle
@@ -8,7 +8,7 @@ from .collision import CollisionResolver2d, DETECT_COLLISIONS
 from .collision import RESOLVE_COLLISIONS
 
 __all__ = [
-    'AudioPlayer',
+    'AudioSource',
     'CollisionResolver2d',
     'DETECT_COLLISIONS',
     'DiskLoader',
