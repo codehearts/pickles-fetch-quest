@@ -1,66 +1,67 @@
-from .exceptions import DuplicateAudioStreamException
 from ..event_dispatcher import EventDispatcher
 import pyglet.media
 
 
-class AudioPlayer(pyglet.media.Player, EventDispatcher):
-    """Audio player with playback control for audio files on disk.
+class AudioPlayer(EventDispatcher):
+    """Playback control for an audio source.
 
     See :cls:`event_dispatcher.EventDispatcher` for usage information on the
     event dispatcher.
 
     Attributes:
-        loop (bool): True to loop playback of the audio. Defaults to False.
-        volume (float): 0 for silence, 1 for full volume.
-            Affected by the ``position`` attribute. Defaults to 1.
-        position (tuple of float): 3D coordinates for audio location in space.
-            Affects the volume attribute based on the listener source.
-            Defaults to (0, 0, 0).
+        position (tuple of int): The position of the audio source in
+            two-dimensional space. :obj:`audio.AudioDirector` uses this
+            property to determine the volume of audio based on its distance
+            from the listener.
+        looping (bool): Whether the audio source loops its playback.
+        volume (float): 0 for silence, 1 for nominal volume.
+        state (int): The current state of the audio playback. Will be one of
+            ``AudioPlayer.PLAY``, ``AudioPlayer.PAUSE``, ``AudioPlayer.STOP``.
 
     Events:
         on_play: The audio player has begun playing.
-            The player will be passed to the listeners.
+            The player will be passed to the listener.
         on_pause: The audio player has been paused.
-            The player will be passed to the listeners.
-        on_stop: The audio player has been stopped.
-            The player will be passed to the listeners.
-        on_finish: The audio player has completed playback.
+            The player will be passed to the listener.
+        on_stop: The audio player has been stopped or finished playback.
+            The player will be passed to the listener.
     """
 
-    def __init__(self, audio, loop=False):
-        """Creates an audio player for controlling playback of audio files.
+    PLAY = 0
+    PAUSE = 1
+    STOP = 2
+
+    def __init__(self, source, position=(0, 0)):
+        """Creates an audio player to control playback of an audio source.
 
         Args:
-            audio (:obj:`pyglet.media.Source`): An audio file read from disk.
+            source (:obj:`pyglet.media.Source`): Audio source for playback.
 
         Kwargs:
-            loop (bool, optional): True to loop when audio playback completes.
+            position (tuple of int, optional): The location of this audio
+                player in two-dimensional space. Defaults to (0, 0).
         """
         super(AudioPlayer, self).__init__()
 
         self.register_event_type('on_play')
         self.register_event_type('on_pause')
         self.register_event_type('on_stop')
-        self.register_event_type('on_finish')
 
-        self.add_listeners(on_player_eos=self._playback_finished)
+        self._player = pyglet.media.Player()
+        self._player.push_handlers(on_player_eos=self._playback_finished)
+        self._player.queue(source)
 
-        self._position = (0, 0, 0)
-        self._volume = 1
-        self.loop = loop
-
-        try:
-            self.queue(audio)
-        except pyglet.media.MediaException as e:
-            raise DuplicateAudioStreamException(
-                'Only one player can exist for streaming audio.')
+        self.looping = False
+        self.state = AudioPlayer.STOP
+        self._position = position
 
     def play(self):
         """Plays audio from where it left off.
 
         Dispatches an ``on_play`` event with this player.
         """
-        super(AudioPlayer, self).play()
+        self._player.play()
+        self.state = AudioPlayer.PLAY
         self.dispatch_event('on_play', self)
 
     def pause(self):
@@ -68,7 +69,8 @@ class AudioPlayer(pyglet.media.Player, EventDispatcher):
 
         Dispatches an ``on_pause`` event with this player.
         """
-        super(AudioPlayer, self).pause()
+        self._player.pause()
+        self.state = AudioPlayer.PAUSE
         self.dispatch_event('on_pause', self)
 
     def stop(self):
@@ -76,58 +78,55 @@ class AudioPlayer(pyglet.media.Player, EventDispatcher):
 
         Dispatches an ``on_stop`` event with this player.
         """
-        super(AudioPlayer, self).pause()
-        super(AudioPlayer, self).seek(0)
+        self._player.pause()
+        self._player.seek(0)
+
+        self.state = AudioPlayer.STOP
         self.dispatch_event('on_stop', self)
-
-    def restart(self):
-        """Plays the audio source from the beginning.
-
-        Dispatches an ``on_stop`` event with this player followed by an
-        ``on_play`` event with this player.
-        """
-        self.stop()
-        self.play()
 
     def _playback_finished(self):
         """Called when playback of the audio source has finished.
 
-        Dispatches an ``on_finish`` event with this player.
+        If the player is looping, playback will resume from the beginning of
+        the audio source. If the player is not looping, an ``on_stop`` event
+        will be dispatched with this player instance.
         """
-        self.dispatch_event('on_finish', self)
-
-    @property
-    def position(self):
-        """The three dimensional location in space of this player's audio.
-
-        Returns:
-            A tuple of floats representing the x, y, and z coordinates.
-        """
-        return self._position
-
-    @position.setter
-    def position(self, coordinates):
-        """Sets the position of this player's audio in space.
-
-        Args:
-            coordinates (tuple of float): The x, y, and z coordinates in space.
-        """
-        self._position = coordinates
+        if self.looping:
+            self._player.seek(0)
+            self._player.play()
+        else:
+            self.state = AudioPlayer.STOP
+            self.dispatch_event('on_stop', self)
 
     @property
     def volume(self):
-        """Sets the volume of this player.
-
-        Returns:
-            The volume level as a float; 0 for silence and 1 for full volume.
-        """
-        return self._volume
+        """The volume level of the player as a float between 0 and 1."""
+        return self._player.volume
 
     @volume.setter
     def volume(self, level):
-        """Sets the volume of this player.
+        """Sets the volume of the audio player."""
+        self._player.volume = level
 
-        Args:
-            level (float): A value between 0.0 (silence) and 1.0 (full volume).
-        """
-        self._volume = level
+    @property
+    def position(self):
+        """The position of the player in 2d space as a tuple-like type."""
+        return self._position
+
+    @position.setter
+    def position(self, position):
+        """Sets the player's location in 2d space using a tuple-like object."""
+        self._position = position
+
+        # Pyglet uses 3d coordinates, convert 2d to a 3d tuple
+        self._player.position = (position[0], position[1], 0)
+
+    @property
+    def attenuation_distance(self):
+        """Distance from the listener before the player volume attenuates."""
+        return self._player.min_distance
+
+    @attenuation_distance.setter
+    def attenuation_distance(self, distance):
+        """Sets the attenuation distance of the player."""
+        self._player.min_distance = distance
