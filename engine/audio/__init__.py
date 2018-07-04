@@ -1,3 +1,3 @@
-from .audio_source import AudioSource
+from .audio_director import AudioDirector
 
-__all__ = ['AudioSource']
+__all__ = ['AudioDirector']
