@@ -11,6 +11,18 @@ class TestPoint2d(unittest.TestCase):
         self.assertEqual(1, point.x)
         self.assertEqual(2, point.y)
 
+    def test_access_point_with_indices(self):
+        """A point's x and y coordinates can be accessed via indexing."""
+        point = Point2d(1, 2)
+        self.assertEqual(1, point[0])
+        self.assertEqual(2, point[1])
+
+    def test_access_point_with_invalid_indices_raises_exception(self):
+        """Accessing a point with an invalid index raises an IndexError."""
+        point = Point2d(1, 2)
+        with self.assertRaises(IndexError):
+            point[2]
+
     def test_point_setters(self):
         """Setting x or y updates attributes."""
         point = Point2d(0, 0)
