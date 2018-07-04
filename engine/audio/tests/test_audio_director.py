@@ -6,11 +6,17 @@ import unittest
 class TestAudioDirector(unittest.TestCase):
     """Test management of audio director sources."""
 
-    def setUp(self):
+    @patch('pyglet.media.get_audio_driver')
+    def setUp(self, mock_get_audio_driver):
         """Provides each test case with the following properties::
 
             self.director: An `AudioDirector` object.
         """
+        # Stub the listener during construction in tests
+        mock_listener = Mock()
+        mock_get_audio_driver.return_value.get_listener = Mock(
+            return_value=mock_listener)
+
         self.director = AudioDirector()
 
     @patch('pyglet.media.get_audio_driver')
