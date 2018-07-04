@@ -1,12 +1,18 @@
-from engine import CollisionResolver2d, DiskLoader, GraphicsController
-from engine import GraphicsObject, Physics2d, Rectangle, RESOLVE_COLLISIONS
-from engine import Tile
+from engine import AudioDirector, CollisionResolver2d, DiskLoader
+from engine import GraphicsController, GraphicsObject, Physics2d, Rectangle
+from engine import RESOLVE_COLLISIONS, Tile
 import pyglet.app
 
 DiskLoader.set_resource_paths(['resources/'])
 
+audio_director = AudioDirector(master_volume=0.99)
 pickle_graphics = GraphicsController(160, 140, title="Pickle's Fetch Quest")
 collision_resolver = CollisionResolver2d()
+
+audio_director.attenuation_distance = 40
+
+collision_sound = audio_director.load(
+    'audio/sfx/bass-drum-hit.wav', streaming=False)
 
 tile_image = DiskLoader.load_image('tiles/test.gif')
 
@@ -32,7 +38,13 @@ def create_physics_tile(x, y, *args, **kwargs):
     tile = Tile(tile_geometry_states, x=x, y=y, physics=physics)
     tile_graphic = GraphicsObject({'default': tile_image}, x=tile.x, y=tile.y)
 
-    tile.add_listeners(on_move=tile_graphic.set_position)
+    def play_collision_audio(other):
+        instance = collision_sound.play()
+        instance.position = (20, 0)
+
+    tile.add_listeners(
+        on_move=tile_graphic.set_position,
+        on_collision=play_collision_audio)
     pickle_graphics.add_listeners(on_update=tile.update)
     collision_resolver.register(tile, RESOLVE_COLLISIONS)
 
@@ -42,17 +54,17 @@ def create_physics_tile(x, y, *args, **kwargs):
 
 pickle_graphics.add_listeners(on_update=lambda x: collision_resolver.resolve())
 
-bottom_1, bottom_1_graphic = create_physics_tile(72-160, 46, gravity=(10, 0))
-bottom_2, bottom_2_graphic = create_physics_tile(72, 62-80, gravity=(0, 10))
-bottom_3, bottom_3_graphic = create_physics_tile(88, 62-144, gravity=(0, 10))
+bottom_1, bottom_1_graphic = create_physics_tile(72-160, 46, gravity=(2, 0))
+bottom_2, bottom_2_graphic = create_physics_tile(72, 62-80, gravity=(0, 2))
+bottom_3, bottom_3_graphic = create_physics_tile(88, 62-144, gravity=(0, 2))
 
-middle_1, middle_1_graphic = create_physics_tile(72-96, 62, gravity=(10, 0))
+middle_1, middle_1_graphic = create_physics_tile(72-96, 62, gravity=(2, 0))
 middle_2, middle_2_graphic = create_tile(72, 62)
-middle_3, middle_3_graphic = create_physics_tile(72+64, 62, gravity=(-10, 0))
+middle_3, middle_3_graphic = create_physics_tile(72+64, 62, gravity=(-2, 0))
 
-top_1, top_1_graphic = create_physics_tile(72-176, 78, gravity=(10, 0))
-top_2, top_2_graphic = create_physics_tile(72, 62+112, gravity=(0, -10))
-top_3, top_3_graphic = create_physics_tile(72+128, 78, gravity=(-10, 0))
+top_1, top_1_graphic = create_physics_tile(72-176, 78, gravity=(2, 0))
+top_2, top_2_graphic = create_physics_tile(72, 62+112, gravity=(0, -2))
+top_3, top_3_graphic = create_physics_tile(72+128, 78, gravity=(-2, 0))
 
 
 @pickle_graphics._window.event

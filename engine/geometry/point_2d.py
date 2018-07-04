@@ -43,6 +43,24 @@ class Point2d(object):
                 self.x = other
                 self.y = other
 
+    def __getitem__(self, key):
+        """Access x coordinate at index 0 or y coordinate at index 1.
+
+        Args:
+            key (mixed): Key to access. 0 for x coordinate, 1 for y coordinate.
+
+        Returns:
+            The x or y coordinate, depending on the key.
+
+        Raises:
+            IndexError: If an invalid index is requested.
+        """
+        if key == 0:
+            return self.x
+        elif key == 1:
+            return self.y
+        raise IndexError('Invalid index for coordinate of 2d point')
+
     def _call_with_other(self, fn, other):
         """Calls a function for both coordinates with another object.
 
