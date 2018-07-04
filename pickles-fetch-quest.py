@@ -1,14 +1,17 @@
-from engine import AudioPlayer, CollisionResolver2d, DiskLoader
+from engine import AudioDirector, CollisionResolver2d, DiskLoader
 from engine import GraphicsController, GraphicsObject, Physics2d, Rectangle
 from engine import RESOLVE_COLLISIONS, Tile
 import pyglet.app
 
 DiskLoader.set_resource_paths(['resources/'])
 
+audio_director = AudioDirector(master_volume=0.99)
 pickle_graphics = GraphicsController(160, 140, title="Pickle's Fetch Quest")
 collision_resolver = CollisionResolver2d()
 
-collision_sound = DiskLoader.load_audio(
+audio_director.attenuation_distance = 40
+
+collision_sound = audio_director.load(
     'audio/sfx/bass-drum-hit.wav', streaming=False)
 
 tile_image = DiskLoader.load_image('tiles/test.gif')
@@ -34,11 +37,14 @@ def create_physics_tile(x, y, *args, **kwargs):
     physics = Physics2d(*args, **kwargs)
     tile = Tile(tile_geometry_states, x=x, y=y, physics=physics)
     tile_graphic = GraphicsObject({'default': tile_image}, x=tile.x, y=tile.y)
-    audio = AudioPlayer(collision_sound)
+
+    def play_collision_audio(other):
+        instance = collision_sound.play()
+        instance.position = (20, 0)
 
     tile.add_listeners(
         on_move=tile_graphic.set_position,
-        on_collision=lambda x: audio.play())
+        on_collision=play_collision_audio)
     pickle_graphics.add_listeners(on_update=tile.update)
     collision_resolver.register(tile, RESOLVE_COLLISIONS)
 
