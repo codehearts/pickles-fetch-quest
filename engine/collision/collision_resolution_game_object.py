@@ -18,16 +18,8 @@ def resolve_game_object_collision(first, second):
         True if a collision was resolved, False if no collision existed.
     """
     # No resolution can be performed if both objects lack physics
-    if first.physics is None and second.physics is None:
-        return False
-
-    # First object has no physics, move second object
-    if first.physics is None:
-        return _resolve_game_object_collision_against_static(second, first)
-
-    # Second object has no physics, move first object
-    if second.physics is None:
-        return _resolve_game_object_collision_against_static(first, second)
+    if first.physics is None or second.physics is None:
+        return _resolve_game_object_collision_without_physics(first, second)
 
     # Objects are not overlapping
     if not detect_overlap_2d(first, second):
@@ -70,6 +62,32 @@ def resolve_game_object_y_collision(moving, static):
     if detect_overlap_1d(moving.x, moving.width, static.x, static.width):
         # Overlap detected along x-axis, resolve collision on y-axis
         _resolve_game_object_axis_collision(moving, static, 'y')
+
+
+def _resolve_game_object_collision_without_physics(first, second):
+    """Resolves a collision between game objects which lack physics.
+
+    If one of the two objects has physics, the collision will be resolved by
+    repositioning the object with physics.
+
+    Args:
+        first (:obj:`GameObject`): The first game object in the collision.
+        second (:obj:`GameObject`): The second game object in the collision.
+
+    Returns:
+        True if a collision was resolved, False if no collision existed.
+    """
+    # No resolution can be performed if both objects lack physics
+    if first.physics is None and second.physics is None:
+        return False
+
+    # Consider the object with physics to be moving
+    if first.physics is None:
+        moving, static = second, first
+    else:
+        moving, static = first, second
+
+    return _resolve_game_object_collision_against_static(moving, static)
 
 
 def _resolve_game_object_axis_collision(moving, static, axis):
