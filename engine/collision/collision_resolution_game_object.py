@@ -129,12 +129,20 @@ def _resolve_game_object_collision_against_static(moving, static):
     new_coordinates = get_nonoverlapping_coordinates_2d(
         moving, moving.physics.velocity, static)
 
+    changed_coordinates = []
+
+    # Detect coordinate change on x axis
+    if new_coordinates[0] != moving.x:
+        changed_coordinates.append('x')
+
+    # Detect coordinate change on y axis
+    if new_coordinates[1] != moving.y:
+        changed_coordinates.append('y')
+
     # Cancel velocity along axis the object was moved along
-    for axis in ('x', 'y'):
-        axis_index = 0 if axis == 'x' else 1
-        if new_coordinates[axis_index] != getattr(moving, axis):
-            setattr(moving.physics.acceleration, axis, 0)
-            setattr(moving.physics.velocity, axis, 0)
+    for axis in changed_coordinates:
+        setattr(moving.physics.acceleration, axis, 0)
+        setattr(moving.physics.velocity, axis, 0)
 
     was_collision_resolved = (moving.coordinates != new_coordinates)
     moving.set_position(new_coordinates)
