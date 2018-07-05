@@ -1,6 +1,6 @@
 # Pickle's Fetch Quest
 
-[![Build Status][build-badge]][build-link] [![Coverage][coverage-badge]][coverage-link] [![MIT License][license-badge]](LICENSE.md)
+[![Build Status][build-badge]][build-link] [![Coverage][coverage-badge]][coverage-link] ![Maintainability][health-badge]][health-link]
 
 A throwback to the Game Boy era of gaming, inspired by Kirby's Great Cave Offensive and created for GitHub's 2017 Game Off. Help Pickle brave the Wolf Queen's Palace and collect as many of her treasures as you can!
 
@@ -25,6 +25,7 @@ python -m unittest # Run tests
 
 [coverage-badge]: https://codecov.io/gh/codehearts/pickles-fetch-quest/branch/master/graph/badge.svg
 [coverage-link]:  https://codecov.io/gh/codehearts/pickles-fetch-quest
-[license-badge]:  https://img.shields.io/badge/license-MIT-007EC7.svg
+[health-badge]:   https://api.codeclimate.com/v1/badges/d43c91516157f1c02dd0/maintainability
+[health-link]:    https://codeclimate.com/github/codehearts/pickles-fetch-quest/maintainability
 [build-badge]:    https://travis-ci.org/codehearts/pickles-fetch-quest.svg?branch=master
 [build-link]:     https://travis-ci.org/codehearts/pickles-fetch-quest
