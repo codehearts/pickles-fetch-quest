@@ -97,13 +97,36 @@ class AudioDirector(object):
         """
         self._groups.setdefault(group, set()).add(audio_source)
 
+    def _filter_sources(self, group='all', states=None):
+        """Returns all sources in the group matching the given states.
+
+        Kwargs:
+            group (str, optional): Name of group to filter. Defaults to 'all'.
+            states (list of int, optional): List of :cls:`AudioSource` states
+                to filter on. If the list is not empty and a source's state is
+                not in the list, it will be excluded from the return value.
+
+        Returns:
+            An iterator containing sources in the group matching the states.
+        """
+        # If the group does not exist, return an empty iterator
+        if group not in self._groups:
+            return iter(())
+
+        # If there are no states to filter on, return all sources in the group
+        if not states:
+            return iter(self._groups[group])
+
+        # Return sources in the group matching the states to filter on
+        return filter(lambda src: src.state in states, self._groups[group])
+
     def play(self, group='all'):
         """Plays all audio sources in a group.
 
         Kwargs:
             group (str, optional): Name of group to play. Defaults to 'all'.
         """
-        for audio_source in self._groups.get(group, []):
+        for audio_source in self._filter_sources(group=group):
             audio_source.play()
 
     def pause(self, group='all'):
@@ -114,9 +137,9 @@ class AudioDirector(object):
         Kwargs:
             group (str, optional): Name of group to pause. Defaults to 'all'.
         """
-        for audio_source in self._groups.get(group, []):
-            if audio_source.state is AudioSource.PLAY:
-                audio_source.pause()
+        states = [AudioSource.PLAY]
+        for audio_source in self._filter_sources(group=group, states=states):
+            audio_source.pause()
 
     def stop(self, group='all'):
         """Stops all audio sources in a group.
@@ -124,9 +147,9 @@ class AudioDirector(object):
         Kwargs:
             group (str, optional): Name of group to stop. Defaults to 'all'.
         """
-        for audio_source in self._groups.get(group, []):
-            if audio_source.state is not AudioSource.STOP:
-                audio_source.stop()
+        states = [AudioSource.PLAY, AudioSource.PAUSE]
+        for audio_source in self._filter_sources(group=group, states=states):
+            audio_source.stop()
 
     def resume(self, group='all'):
         """Resumes playback of all paused audio sources in a group.
@@ -136,9 +159,9 @@ class AudioDirector(object):
         Kwargs:
             group (str, optional): Name of group to resume. Defaults to 'all'.
         """
-        for audio_source in self._groups.get(group, []):
-            if audio_source.state is AudioSource.PAUSE:
-                audio_source.play()
+        states = [AudioSource.PAUSE]
+        for audio_source in self._filter_sources(group=group, states=states):
+            audio_source.play()
 
     def set_volume(self, level, group='all'):
         """Sets the volume of all audio sources in a group.
@@ -149,7 +172,7 @@ class AudioDirector(object):
         Kwargs:
             group (str, optional): Group to set volume of. Defaults to 'all'.
         """
-        for audio_source in self._groups.get(group, []):
+        for audio_source in self._filter_sources(group=group):
             audio_source.volume = level
 
     def set_attenuation_distance(self, distance, group='all'):
@@ -163,7 +186,7 @@ class AudioDirector(object):
         Kwargs:
             group (str, optional): Group to set distance of. Defaults to 'all'.
         """
-        for audio_source in self._groups.get(group, []):
+        for audio_source in self._filter_sources(group=group):
             audio_source.attenuation_distance = distance
 
     @property
