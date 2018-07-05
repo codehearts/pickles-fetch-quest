@@ -45,23 +45,21 @@ class Physics2d(object):
             ms (int): The number of milliseconds to run the simulation for.
         """
         # Ensure high resolution velocity matches the current velocity
-        if (self._velocity_1000.x // 1000) != self.velocity.x:
-            self._velocity_1000.x = self.velocity.x * 1000
-        if (self._velocity_1000.y // 1000) != self.velocity.y:
-            self._velocity_1000.y = self.velocity.y * 1000
+        for axis in ('x', 'y'):
+            velocity = getattr(self.velocity, axis)
+            if (getattr(self._velocity_1000, axis) // 1000) != velocity:
+                setattr(self._velocity_1000, axis, velocity * 1000)
 
         self._velocity_1000 += ((self.acceleration + self._gravity) *
                                 self._mass * ms)
         self.velocity = self._velocity_1000 // 1000
 
-        if abs(self.velocity.x) > self._terminal_velocity.x:
-            if self.velocity.x < 0:
-                self.velocity.x = -(self._terminal_velocity.x)
-            else:
-                self.velocity.x = self._terminal_velocity.x
+        for axis in ('x', 'y'):
+            velocity = getattr(self.velocity, axis)
+            terminal_velocity = getattr(self._terminal_velocity, axis)
 
-        if abs(self.velocity.y) > self._terminal_velocity.y:
-            if self.velocity.y < 0:
-                self.velocity.y = -(self._terminal_velocity.y)
-            else:
-                self.velocity.y = self._terminal_velocity.y
+            if abs(velocity) > terminal_velocity:
+                if velocity < 0:
+                    terminal_velocity = -terminal_velocity
+
+                setattr(self.velocity, axis, terminal_velocity)

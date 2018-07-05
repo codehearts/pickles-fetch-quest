@@ -116,8 +116,7 @@ class GameObject(Rectangle, EventDispatcher):
     def x(self, value):
         """Sets the x coordinate of the object and dispatches on_move."""
         if self._coordinates.x != value:
-            self._coordinates.x = value
-            self.dispatch_event('on_move', (self.x, self.y))
+            self.set_position((value, self.y))
 
     @property
     def y(self):
@@ -128,5 +127,4 @@ class GameObject(Rectangle, EventDispatcher):
     def y(self, value):
         """Sets the y coordinate of the object and dispatches on_move."""
         if self._coordinates.y != value:
-            self._coordinates.y = value
-            self.dispatch_event('on_move', (self.x, self.y))
+            self.set_position((self.x, value))
