@@ -54,16 +54,10 @@ def resolve_game_object_x_collision(moving, static):
         static (:obj:`GameObject`): The object to leave as-is.
     """
     # Detect overlap before applying velocity along y axis, but after x axis
-    if detect_overlap_1d(moving.y - moving.physics.velocity.y, moving.height,
-                         static.y, static.height):
+    previous_y = moving.y - moving.physics.velocity.y
+    if detect_overlap_1d(previous_y, moving.height, static.y, static.height):
         # Overlap detected along y-axis, resolve collision on x-axis
-        x = get_nonoverlapping_coordinate_1d(moving.x, moving.width,
-                                             moving.physics.velocity.x,
-                                             static.x, static.width)
-        if x != moving.x:
-            moving.physics.acceleration.x = 0
-            moving.physics.velocity.x = 0
-            moving.x = x
+        _resolve_game_object_axis_collision(moving, static, 'x')
 
 
 def resolve_game_object_y_collision(moving, static):
@@ -75,14 +69,33 @@ def resolve_game_object_y_collision(moving, static):
     """
     if detect_overlap_1d(moving.x, moving.width, static.x, static.width):
         # Overlap detected along x-axis, resolve collision on y-axis
-        y = get_nonoverlapping_coordinate_1d(moving.y, moving.height,
-                                             moving.physics.velocity.y,
-                                             static.y, static.height)
+        _resolve_game_object_axis_collision(moving, static, 'y')
 
-        if y != moving.y:
-            moving.physics.acceleration.y = 0
-            moving.physics.velocity.y = 0
-            moving.y = y
+
+def _resolve_game_object_axis_collision(moving, static, axis):
+    """Resolves a collision by moving an object along the specified axis.
+
+    Args:
+        moving (:obj:`GameObject`): The object to move along the axis.
+        static (:obj:`GameObject`): The object to leave as-is.
+        axis (str): Either 'x' or 'y'.
+    """
+    moving_length = moving.width if axis == 'x' else moving.height
+    static_length = static.width if axis == 'x' else static.height
+
+    # Get a new coordinate for the moving object to resolve the collision
+    resolved_coordinate = get_nonoverlapping_coordinate_1d(
+        getattr(moving, axis),
+        moving_length,
+        getattr(moving.physics.velocity, axis),
+        getattr(static, axis),
+        static_length)
+
+    # Cancel velocity/acceleration and update coordinate of moving object
+    if resolved_coordinate != getattr(moving, axis):
+        setattr(moving.physics.acceleration, axis, 0)
+        setattr(moving.physics.velocity, axis, 0)
+        setattr(moving, axis, resolved_coordinate)
 
 
 def _resolve_game_object_collision_against_static(moving, static):
@@ -99,12 +112,11 @@ def _resolve_game_object_collision_against_static(moving, static):
         moving, moving.physics.velocity, static)
 
     # Cancel velocity along axis the object was moved along
-    if new_coordinates[0] != moving.x:
-        moving.physics.acceleration.x = 0
-        moving.physics.velocity.x = 0
-    if new_coordinates[1] != moving.y:
-        moving.physics.acceleration.y = 0
-        moving.physics.velocity.y = 0
+    for axis in ('x', 'y'):
+        axis_index = 0 if axis == 'x' else 1
+        if new_coordinates[axis_index] != getattr(moving, axis):
+            setattr(moving.physics.acceleration, axis, 0)
+            setattr(moving.physics.velocity, axis, 0)
 
     was_collision_resolved = (moving.coordinates != new_coordinates)
     moving.set_position(new_coordinates)
