@@ -43,6 +43,14 @@ class Point2d(object):
                 self.x = other
                 self.y = other
 
+    def __repr__(self):
+        """Returns a human-readable string representation of the point.
+
+        Returns:
+            A string in the format "Point2d(x, y)".
+        """
+        return 'Point2d({}, {})'.format(self.x, self.y)
+
     def __getitem__(self, key):
         """Access x coordinate at index 0 or y coordinate at index 1.
 
@@ -119,6 +127,22 @@ class Point2d(object):
             other (:obj:`Object`): The value to add to the point.
         """
         return Point2d(*self._call_with_other(operator.add, other))
+
+    def __sub__(self, other):
+        """Subtracts from the x and y coordinates.
+
+        If `other` is another :cls:`Point2d`, the x and y coordinates will be
+        subtracted by the x and y coordinates of the other point respectively.
+
+        If `other` is an iterable, the first index is subtracted from the x
+        coordinate and the second index is subtracted from the y coordinate.
+
+        If `other` is a number, it will be subtracted from both coordinates.
+
+        Args:
+            other (:obj:`Object`): The value to subtract from the point.
+        """
+        return Point2d(*self._call_with_other(operator.sub, other))
 
     def __mul__(self, other):
         """Multiplies the x and y coordinates by the value.
