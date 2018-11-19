@@ -1,12 +1,14 @@
 from engine import AudioDirector, CollisionResolver2d, DiskLoader
-from engine import GraphicsController, GraphicsObject, Physics2d, Rectangle
-from engine import RESOLVE_COLLISIONS, Tile
+from engine import GraphicsController, GraphicsObject, KeyHandler, Physics2d
+from engine import Rectangle, RESOLVE_COLLISIONS, Tile
+from pyglet.window import key
 import pyglet.app
 
 DiskLoader.set_resource_paths(['resources/'])
 
 audio_director = AudioDirector(master_volume=0.99)
 pickle_graphics = GraphicsController(160, 140, title="Pickle's Fetch Quest")
+key_handler = KeyHandler(pickle_graphics)
 collision_resolver = CollisionResolver2d()
 
 audio_director.attenuation_distance = 40
@@ -16,55 +18,134 @@ collision_sound = audio_director.load(
 
 tile_image = DiskLoader.load_image('tiles/test.gif')
 
-tile_geometry_states = {
-    'default': Rectangle(x=0, y=0, width=16, height=16)
-}
 graphics = []
 
 
-def create_tile(x, y):
-    tile = Tile(tile_geometry_states, x=x, y=y)
-    tile_graphic = GraphicsObject({'default': tile_image}, x=tile.x, y=tile.y)
-
-    tile.add_listeners(on_move=tile_graphic.set_position)
-    collision_resolver.register(tile, RESOLVE_COLLISIONS)
-
+def create_tile_graphic(x, y):
+    tile_graphic = GraphicsObject({'default': tile_image}, x=x, y=y)
     graphics.append(tile_graphic)
-    return tile, tile_graphic
+
+    return tile_graphic
 
 
-def create_physics_tile(x, y, *args, **kwargs):
+def create_physics_tile(x, y, states, *args, **kwargs):
     physics = Physics2d(*args, **kwargs)
-    tile = Tile(tile_geometry_states, x=x, y=y, physics=physics)
-    tile_graphic = GraphicsObject({'default': tile_image}, x=tile.x, y=tile.y)
+    tile = Tile(states, x=x, y=y, physics=physics)
 
     def play_collision_audio(other):
         instance = collision_sound.play()
         instance.position = (20, 0)
 
-    tile.add_listeners(
-        on_move=tile_graphic.set_position,
-        on_collision=play_collision_audio)
+    tile.add_listeners(on_collision=play_collision_audio)
     pickle_graphics.add_listeners(on_update=tile.update)
     collision_resolver.register(tile, RESOLVE_COLLISIONS)
 
-    graphics.append(tile_graphic)
-    return tile, tile_graphic
+    return tile
 
 
-pickle_graphics.add_listeners(on_update=lambda x: collision_resolver.resolve())
+def on_update(dt):
+    collision_resolver.resolve()
+    key_handler.update(dt)
 
-bottom_1, bottom_1_graphic = create_physics_tile(72-160, 46, gravity=(2, 0))
-bottom_2, bottom_2_graphic = create_physics_tile(72, 62-80, gravity=(0, 2))
-bottom_3, bottom_3_graphic = create_physics_tile(88, 62-144, gravity=(0, 2))
 
-middle_1, middle_1_graphic = create_physics_tile(72-96, 62, gravity=(2, 0))
-middle_2, middle_2_graphic = create_tile(72, 62)
-middle_3, middle_3_graphic = create_physics_tile(72+64, 62, gravity=(-2, 0))
+pickle_graphics.add_listeners(on_update=on_update)
 
-top_1, top_1_graphic = create_physics_tile(72-176, 78, gravity=(2, 0))
-top_2, top_2_graphic = create_physics_tile(72, 62+112, gravity=(0, -2))
-top_3, top_3_graphic = create_physics_tile(72+128, 78, gravity=(-2, 0))
+# Floor
+create_tile_graphic(-8, 24)
+create_tile_graphic(8, 24)
+create_tile_graphic(24, 24)
+create_tile_graphic(40, 24)
+create_tile_graphic(56, 24)
+create_tile_graphic(72, 24)
+create_tile_graphic(88, 24)
+create_tile_graphic(104, 24)
+create_tile_graphic(120, 24)
+create_tile_graphic(136, 24)
+create_tile_graphic(152, 24)
+floor_states = {'default': Rectangle(x=0, y=0, width=176, height=16)}
+create_physics_tile(-8, 24, floor_states, gravity=(0, 0))
+
+# Left wall
+create_tile_graphic(-8, 40)
+create_tile_graphic(-8, 56)
+create_tile_graphic(-8, 72)
+create_tile_graphic(-8, 88)
+create_tile_graphic(-8, 104)
+left_wall_states = {'default': Rectangle(x=0, y=0, width=16, height=80)}
+create_physics_tile(-8, 40, left_wall_states, gravity=(0, 0))
+
+# Right wall
+create_tile_graphic(152, 40)
+create_tile_graphic(152, 56)
+create_tile_graphic(152, 72)
+create_tile_graphic(152, 88)
+create_tile_graphic(152, 104)
+right_wall_states = {'default': Rectangle(x=0, y=0, width=16, height=80)}
+create_physics_tile(152, 40, right_wall_states, gravity=(0, 0))
+
+# Player
+player_states = {
+    'default': Rectangle(x=0, y=0, width=16, height=16)
+}
+
+player_graphic = create_tile_graphic(72, 88)
+player = create_physics_tile(72, 88, player_states, friction=75,
+                             gravity=(0, -15), terminal_velocity=(2, 100))
+player.add_listeners(on_move=player_graphic.set_position)
+
+
+class PlayerControls(object):
+    def __init__(self, player_object, walk_acceleration, jump_height):
+        self._player = player_object
+        self._walk_acceleration = walk_acceleration
+        self._jump_height = jump_height
+        self._last_ground_position = player_object.y
+        self._is_jumping = False
+
+    @property
+    def _is_aerial(self):
+        return self._player.physics.velocity.y != 0 or self._is_jumping
+
+    def jump(self, *args):
+        if not self._is_aerial:
+            self._last_ground_position = self._player.y
+            self._player.physics.acceleration.y = 80
+            self._is_jumping = True
+        if self._player.y >= self._last_ground_position + self._jump_height:
+            self._player.physics.acceleration.y = 0
+        else:
+            height_difference = self._player.y - self._last_ground_position
+            jump_percent = 1 - (height_difference / self._jump_height)
+
+            # Acceleration eases in until the object is past the jump height
+            self._player.physics.acceleration.y *= pow(max(jump_percent, 0), 3)
+
+    def cancel_jump(self, *args):
+        self._player.physics.acceleration.y = 0
+        self._is_jumping = False
+
+    def walk_left(self, *args):
+        self._player.physics.acceleration.x = -self._walk_acceleration
+
+    def walk_right(self, *args):
+        self._player.physics.acceleration.x = self._walk_acceleration
+
+    def stop_walking(self, *args):
+        self._player.physics.acceleration.x = 0
+
+
+# Fine-grained player controls
+player_controls = PlayerControls(player, walk_acceleration=30, jump_height=48)
+
+# Player key down handlers
+key_handler.on_key_down(key.LEFT, player_controls.walk_left)
+key_handler.on_key_down(key.RIGHT, player_controls.walk_right)
+key_handler.on_key_down(key.UP, player_controls.jump)
+
+# Player key release handlers
+key_handler.on_key_release(key.LEFT, player_controls.stop_walking)
+key_handler.on_key_release(key.RIGHT, player_controls.stop_walking)
+key_handler.on_key_release(key.UP, player_controls.cancel_jump)
 
 
 @pickle_graphics._window.event
