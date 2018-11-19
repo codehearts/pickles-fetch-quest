@@ -23,6 +23,13 @@ flake8             # Lint codebase
 python -m unittest # Run tests
 ```
 
+Tests can also be run with coverage reporting.
+
+```bash
+coverage run -m unittest                        # Run tests with coverage
+coverage report -m --skip-covered --include=./* # Report files without 100% coverage
+```
+
 [coverage-badge]: https://codecov.io/gh/codehearts/pickles-fetch-quest/branch/master/graph/badge.svg
 [coverage-link]:  https://codecov.io/gh/codehearts/pickles-fetch-quest
 [health-badge]:   https://api.codeclimate.com/v1/badges/d43c91516157f1c02dd0/maintainability
