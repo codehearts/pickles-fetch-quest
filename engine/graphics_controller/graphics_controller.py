@@ -44,3 +44,18 @@ class GraphicsController(EventDispatcher):
             seconds (float): The number of seconds elapsed since last update.
         """
         self.dispatch_event('on_update', int(seconds * 1000))
+
+    def add_key_handler(self, key_handler, on_press, on_release):
+        """Adds a key handler to the window owned by the controller.
+
+        Args:
+            key_handler (:obj:`pyglet.window.key.KeyStateHandler`): The key
+                handler to receive key events from this controller's window.
+            on_press (fn): Callback for when a key is initially pressed.
+                Receives the pressed key and any modifies as ints.
+            on_release (fn): Callback for when a key is initially released.
+                Receives the pressed key and any modifies as ints.
+        """
+        self._window.push_handlers(key_handler)
+        self._window.push_handlers(
+            on_key_press=on_press, on_key_release=on_release)

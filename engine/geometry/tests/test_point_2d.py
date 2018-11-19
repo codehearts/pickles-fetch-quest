@@ -23,6 +23,11 @@ class TestPoint2d(unittest.TestCase):
         with self.assertRaises(IndexError):
             point[2]
 
+    def test_string_representation(self):
+        """Points are represented as "Point2d(x, y)" in string form."""
+        point = Point2d(1, 2)
+        self.assertEqual("Point2d(1, 2)", str(point))
+
     def test_point_setters(self):
         """Setting x or y updates attributes."""
         point = Point2d(0, 0)
@@ -119,6 +124,45 @@ class TestPoint2d(unittest.TestCase):
         self.assertEqual(2, point.y)
         self.assertEqual(1, point2.x)
         self.assertEqual(2, point2.y)
+
+    def test_point_scalar_subtraction(self):
+        """Subtracting scalar from point updates both coordinates."""
+        point = Point2d(0, 0)
+
+        # __sub__ should not affect the value of point
+        point2 = point - 2
+
+        point -= 2
+        self.assertEqual(-2, point.x)
+        self.assertEqual(-2, point.y)
+        self.assertEqual(-2, point2.x)
+        self.assertEqual(-2, point2.y)
+
+    def test_point_vector_subtraction(self):
+        """Subtracting vector from point updates both coordinates."""
+        point = Point2d(0, 0)
+
+        # __sub__ should not affect the value of point
+        point2 = point - (1, 2)
+
+        point -= (1, 2)
+        self.assertEqual(-1, point.x)
+        self.assertEqual(-2, point.y)
+        self.assertEqual(-1, point2.x)
+        self.assertEqual(-2, point2.y)
+
+    def test_point_subtraction(self):
+        """Subtracting point from point updates both coordinates."""
+        point = Point2d(0, 0)
+
+        # __sub__ should not affect the value of point
+        point2 = point - Point2d(1, 2)
+
+        point -= Point2d(1, 2)
+        self.assertEqual(-1, point.x)
+        self.assertEqual(-2, point.y)
+        self.assertEqual(-1, point2.x)
+        self.assertEqual(-2, point2.y)
 
     def test_point_scalar_multiplication(self):
         """Multiplying point by scalar updates both coordinates."""

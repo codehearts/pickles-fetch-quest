@@ -1,3 +1,4 @@
+from ..util.math import divide_toward_zero
 from ..geometry import Point2d
 
 
@@ -9,26 +10,27 @@ class Physics2d(object):
             in units per second.
         acceleration (:obj:`geometry.Point2d`): Acceleration along the x and y
             axes in units per second.
+        friction (int): Coefficient of friction between 1 and 100 when no
+            acceleration is applied, to slow the object to rest.
     """
 
-    def __init__(self, mass=1, velocity=(0, 0), acceleration=(0, 0),
-                 gravity=(0, -10), terminal_velocity=(100, 100)):
+    def __init__(self, mass=1, friction=100, gravity=(0, -10),
+                 terminal_velocity=(100, 100)):
         """Creates a new two dimensional physics simulation.
 
         Args:
             mass (int, optional): Mass of the object in units. Defaults to 100.
-            velocity (tuple of int, optional): Initial velocity in units per
-                second. Defaults to (0, 0).
-            acceleration (tuple of int, optional): Initial acceleration in
-                units per second. Defaults to (0, 0).
+            friction (int): Coefficient of friction between 1 and 100 when no
+                acceleration is applied, to slow it to rest. Defaults to 100.
             gravity (tuple of int, optional): Gravitational pull on the object
                 in units per second. Defaults to (0, 10).
             terminal_velocity (tuple of int, optional): Terminal velocity along
                 the x and y axes in units per second. Defaults to (100, 100).
         """
         super(Physics2d, self).__init__()
-        self.velocity = Point2d(*velocity)
-        self.acceleration = Point2d(*acceleration)
+        self.velocity = Point2d(0, 0)
+        self.acceleration = Point2d(0, 0)
+        self.friction = max(min(100, friction), 1)  # Clamp between 1 and 100
         self._terminal_velocity = Point2d(*terminal_velocity)
         self._gravity = Point2d(*gravity)
         self._mass = mass
@@ -44,20 +46,37 @@ class Physics2d(object):
         Args:
             ms (int): The number of milliseconds to run the simulation for.
         """
-        # Ensure high resolution velocity matches the current velocity
+        # Calculate the total acceleration as force applied plus gravity
+        total_acceleration = (self.acceleration + self._gravity)
+        friction = 100 - self.friction
+
         for axis in ('x', 'y'):
             velocity = getattr(self.velocity, axis)
-            if (getattr(self._velocity_1000, axis) // 1000) != velocity:
+            velocity_1000 = getattr(self._velocity_1000, axis)
+
+            # Ensure high resolution velocity matches the current velocity
+            if divide_toward_zero(velocity_1000, 1000) != velocity:
                 setattr(self._velocity_1000, axis, velocity * 1000)
 
-        self._velocity_1000 += ((self.acceleration + self._gravity) *
-                                self._mass * ms)
-        self.velocity = self._velocity_1000 // 1000
+            # Apply friction to decelerate when no acceleration is present
+            if getattr(total_acceleration, axis) == 0:
+                setattr(self._velocity_1000, axis,
+                        divide_toward_zero(velocity_1000 * friction, 100))
+
+        # Update velocity based on acceleration, mass, and time
+        self._velocity_1000 += (total_acceleration * self._mass * ms)
 
         for axis in ('x', 'y'):
+            velocity_1000 = getattr(self._velocity_1000, axis)
+
+            # Round off the integer velocity towards 0
+            setattr(self.velocity, axis,
+                    divide_toward_zero(velocity_1000, 1000))
+
             velocity = getattr(self.velocity, axis)
             terminal_velocity = getattr(self._terminal_velocity, axis)
 
+            # Apply terminal velocity
             if abs(velocity) > terminal_velocity:
                 if velocity < 0:
                     terminal_velocity = -terminal_velocity

@@ -1,5 +1,5 @@
 from ..graphics_controller import GraphicsController
-from unittest.mock import Mock, patch
+from unittest.mock import call, Mock, patch
 import unittest
 
 UPDATE_RATE_DEFAULT = 120
@@ -80,3 +80,17 @@ class TestGraphicsController(unittest.TestCase):
         controller.add_listeners(on_update=on_update_mock)
         controller._dispatch_update(0.12345)
         on_update_mock.assert_called_once_with(123)
+
+    def test_key_handlers_are_added_to_window(self):
+        """Key handlers are pushed to the controller's window."""
+        controller = GraphicsController(400, 300)
+        window_mock = self.MockPygletWindow.return_value
+        handler_mock = Mock()
+        press_mock = Mock()
+        release_mock = Mock()
+
+        controller.add_key_handler(
+            handler_mock, on_press=press_mock, on_release=release_mock)
+        window_mock.push_handlers.assert_has_calls([
+            call(handler_mock),
+            call(on_key_press=press_mock, on_key_release=release_mock)])
