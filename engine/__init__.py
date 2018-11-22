@@ -1,7 +1,7 @@
 from .audio import AudioDirector
 from .graphics_controller import GraphicsController, GraphicsObject
 from .disk_loader import DiskLoader
-from .geometry import Rectangle
+from .geometry import Point2d, Rectangle
 from .game_objects import Tile
 from .key_handler import KeyHandler
 from .physics import Physics2d
@@ -16,6 +16,7 @@ __all__ = [
     'GraphicsController',
     'GraphicsObject',
     'KeyHandler',
+    'Point2d',
     'Physics2d',
     'Rectangle',
     'RESOLVE_COLLISIONS',
