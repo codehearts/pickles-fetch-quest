@@ -26,7 +26,9 @@ class GraphicsObject(object):
 
                     {
                         'default':   idle_image,
-                        'activated': activated_image
+                        'activated': activated_image,
+                        'flashing': GraphicsObjects.create_animation(
+                            flashing_image_grid[0:4], 500, loop=True)
                     }
             x (int, optional): The x coordinate for the graphic's left edge.
                 Defaults to 0.
@@ -53,3 +55,29 @@ class GraphicsObject(object):
             the graphic's lower left corner.
         """
         self._sprite.position = coordinates
+
+    @classmethod
+    def create_animation(cls, frames, duration, loop=True):
+        """Creates an animation from a list of images.
+
+        Frames can be sliced from an image grid using list slicing.
+
+            GraphicsObject.create_animation(image_grid[0:4], 1.5, loop=True)
+
+        Args:
+            indices (list of :obj:`pyglet.image.AbstractImage`):
+                List of animation frames, in display order.
+            duration (float): Duration of each frame, in seconds.
+
+        Kwargs:
+            loop (bool, optional): Whether the animation loops indefinitely.
+                Defaults to True.
+
+        Returns:
+            A :obj:`pyglet.image.Animation` created from the given frames.
+        """
+        # Create an animation from the given frames
+        animation = pyglet.image.Animation.from_image_sequence(
+            frames, duration, loop=loop)
+
+        return animation

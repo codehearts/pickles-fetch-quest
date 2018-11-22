@@ -23,6 +23,20 @@ class TestGraphicsObject(unittest.TestCase):
         GraphicsObject(states, **kwargs)
         MockSprite.assert_called_once_with(states['default'], **kwargs)
 
+    @patch('pyglet.image.Animation')
+    @patch('pyglet.image.atlas.TextureBin')
+    def test_create_animation(self, mock_texture_bin, mock_animation):
+        """Creates an animation object from a list of frames."""
+        frames = [Mock(), Mock(), Mock(), Mock()]
+        animation = GraphicsObject.create_animation(frames[:2], 1, loop=False)
+
+        self.assertEqual(
+            mock_animation.from_image_sequence.return_value,
+            animation)
+
+        mock_animation.from_image_sequence.assert_called_once_with(
+            frames[:2], 1, loop=False)
+
     @patch('pyglet.sprite.Sprite')
     def test_create_graphics_object_without_default_state(self, MockSprite):
         """KeyError is raised when default display state is omitted."""
