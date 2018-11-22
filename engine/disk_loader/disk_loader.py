@@ -1,4 +1,5 @@
 import pyglet.resource
+import pyglet.image
 
 
 class DiskLoader(object):
@@ -27,6 +28,32 @@ class DiskLoader(object):
             A :obj:`pyglet.image.Texture` for the loaded image.
         """
         return pyglet.resource.image(filename)
+
+    @classmethod
+    def load_image_grid(cls, filename, rows, columns, **kwargs):
+        """Loads an image grid file from disk, such as a sprite sheet.
+
+        Args:
+            filename (:obj:`str`): The name of the image file, relative to
+                the resource path.
+            rows (int): Number of rows in the image grid.
+            columns (int): Number of columns in the image grid.
+
+        Kwargs:
+            item_width (int, optional): Width of each column. Default is
+                calculated as the image width divided by the number of columns.
+            item_height (int, optional): Height of each row. Default is
+                calculated as the image height divided by the number of rows.
+            row_padding (int, optional): Number of pixels between each row,
+                excluding the edges of the image. Defaults to 0.
+            column_padding (int, optional): Number of pixels between each
+                column, excluding the edges of the image. Defaults to 0.
+
+        Returns:
+            A :obj:`pyglet.image.ImageGrid` for the loaded image grid.
+        """
+        image = cls.load_image(filename)
+        return pyglet.image.ImageGrid(image, rows, columns, **kwargs)
 
     @classmethod
     def load_audio(cls, filename, streaming=True):
