@@ -80,3 +80,18 @@ class TestDiskLoader(unittest.TestCase):
         self.assertEqual(
             [['1', '2', '3'], ['4', '5', '6'], ['-1', '-1', '-1']],
             csv_contents)
+
+    @patch('pyglet.resource.file')
+    def test_load_json(self, mock_file):
+        """Loads a JSON file into a dict."""
+        # Stub the mock JSON data
+        mock_json_data = '{ "a": 1, "b": true, "3": "c" }'
+        mock_file.return_value.__enter__().read.return_value = mock_json_data
+
+        json_contents = DiskLoader.load_json('abc.json')
+
+        # JSON was opened in readonly mode
+        mock_file.assert_called_once_with('abc.json', mode='r')
+
+        # Returned dict is as expected
+        self.assertEqual({'a': 1, 'b': True, '3': 'c'}, json_contents)

@@ -1,3 +1,4 @@
+from json import load as json_load
 import pyglet.resource
 import pyglet.image
 import csv
@@ -89,3 +90,18 @@ class DiskLoader(object):
             csv_data = list(csv.reader(csv_file))
 
         return csv_data
+
+    @classmethod
+    def load_json(cls, path):
+        """Loads a JSON from disk into a dict.
+
+        Args:
+            path (str): Path to the JSON file, relative to the resource path.
+
+        Returns:
+            A dict representation of the JSON file.
+        """
+        with pyglet.resource.file(path, mode='r') as json_file:
+            json_data = json_load(json_file)
+
+        return json_data
