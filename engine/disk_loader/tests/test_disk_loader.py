@@ -62,3 +62,21 @@ class TestDiskLoader(unittest.TestCase):
         audio = DiskLoader.load_audio('abc.wav', streaming=False)
         mock_audio.assert_called_once_with('abc.wav', streaming=False)
         self.assertEqual(mock_audio.return_value, audio)
+
+    @patch('pyglet.resource.file')
+    def test_load_csv(self, mock_file):
+        """Loads a CSV file into a two dimensional list."""
+        # Stub the file object for the CSV
+        csv_iter = (x for x in ('1,2,3', '4,5,6', '-1,-1,-1'))
+        mock_file.return_value.__enter__().__iter__ = lambda x: x
+        mock_file.return_value.__enter__().__next__ = lambda x: next(csv_iter)
+
+        csv_contents = DiskLoader.load_csv('abc.csv')
+
+        # CSV was opened in readonly mode
+        mock_file.assert_called_once_with('abc.csv', mode='r')
+
+        # Returned list is as expected
+        self.assertEqual(
+            [['1', '2', '3'], ['4', '5', '6'], ['-1', '-1', '-1']],
+            csv_contents)

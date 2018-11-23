@@ -1,5 +1,6 @@
 import pyglet.resource
 import pyglet.image
+import csv
 
 
 class DiskLoader(object):
@@ -73,3 +74,18 @@ class DiskLoader(object):
             A :obj:`pyglet.media.Source` for the loaded audio.
         """
         return pyglet.resource.media(filename, streaming=streaming)
+
+    @classmethod
+    def load_csv(cls, path):
+        """Loads a CSV from disk into a two dimensional list of entries.
+
+        Args:
+            path (str): Path to the CSV file, relative to the resource path.
+
+        Returns:
+            A list of entry lists, one list per each line.
+        """
+        with pyglet.resource.file(path, mode='r') as csv_file:
+            csv_data = list(csv.reader(csv_file))
+
+        return csv_data
