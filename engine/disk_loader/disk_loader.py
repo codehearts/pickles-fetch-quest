@@ -1,4 +1,5 @@
 from json import load as json_load
+from defusedxml import ElementTree
 import pyglet.resource
 import pyglet.image
 import csv
@@ -105,3 +106,18 @@ class DiskLoader(object):
             json_data = json_load(json_file)
 
         return json_data
+
+    @classmethod
+    def load_xml(cls, path):
+        """Loads an XML from disk into an :obj:`xml.etree.ElementTree`.
+
+        Args:
+            path (str): Path to the XML file, relative to the resource path.
+
+        Returns:
+            The root :obj:`xml.etree.Element` of the XML tree.
+        """
+        with pyglet.resource.file(path, mode='r') as xml_file:
+            xml_data = ElementTree.parse(xml_file)
+
+        return xml_data.getroot()

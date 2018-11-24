@@ -1,6 +1,7 @@
 from ..disk_loader import DiskLoader
 from unittest.mock import Mock, patch
 import unittest
+import io
 
 
 class TestDiskLoader(unittest.TestCase):
@@ -95,3 +96,40 @@ class TestDiskLoader(unittest.TestCase):
 
         # Returned dict is as expected
         self.assertEqual({'a': 1, 'b': True, '3': 'c'}, json_contents)
+
+    @patch('pyglet.resource.file')
+    def test_load_xml(self, mock_file):
+        """Loads an XML file into an ElementTree."""
+        # Stub the mock XML file
+        mock_xml = '<?xml version="1.0" encoding="UTF-8"?>'
+        mock_xml += '<data>'
+        mock_xml += '\t<element name="first">\n'
+        mock_xml += '\t\t<value>1</value>\n'
+        mock_xml += '\t</element>\n'
+        mock_xml += '\t<element name="second">\n'
+        mock_xml += '\t\t<value>2</value>\n'
+        mock_xml += '\t</element>\n'
+        mock_xml += '</data>'
+        mock_file.return_value.__enter__.return_value = io.StringIO(mock_xml)
+
+        root_node = DiskLoader.load_xml('abc.xml')
+
+        # XML was opened in readonly mode
+        mock_file.assert_called_once_with('abc.xml', mode='r')
+
+        # The returned tree structure is as expected
+        self.assertEqual('data', root_node.tag)
+
+        first_child = list(root_node)[0]
+        self.assertEqual('element', first_child.tag)
+        self.assertEqual('first', first_child.attrib['name'])
+
+        self.assertEqual('value', list(first_child)[0].tag)
+        self.assertEqual('1', list(first_child)[0].text)
+
+        second_child = list(root_node)[1]
+        self.assertEqual('element', second_child.tag)
+        self.assertEqual('second', second_child.attrib['name'])
+
+        self.assertEqual('value', list(second_child)[0].tag)
+        self.assertEqual('2', list(second_child)[0].text)
