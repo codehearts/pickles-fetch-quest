@@ -1,8 +1,9 @@
 from engine import AudioDirector, CollisionResolver2d, DiskLoader
 from engine import GraphicsController, GraphicsObject, KeyHandler, Physics2d
-from engine import Rectangle, RESOLVE_COLLISIONS, Tile
+from engine import Point2d, Rectangle, RESOLVE_COLLISIONS, Tile
 from pyglet.window import key
 import pyglet.app
+import pyglet.gl
 
 DiskLoader.set_resource_paths(['resources/'])
 
@@ -22,7 +23,7 @@ graphics = []
 
 
 def create_tile_graphic(x, y):
-    tile_graphic = GraphicsObject({'default': tile_image}, x=x, y=y)
+    tile_graphic = GraphicsObject(Point2d(x, y), {'default': tile_image})
     graphics.append(tile_graphic)
 
     return tile_graphic
@@ -46,6 +47,9 @@ def create_physics_tile(x, y, states, *args, **kwargs):
 def on_update(dt):
     collision_resolver.resolve()
     key_handler.update(dt)
+
+    for graphic in graphics:
+        graphic.update(dt)
 
 
 pickle_graphics.add_listeners(on_update=on_update)
@@ -84,14 +88,19 @@ right_wall_states = {'default': Rectangle(x=0, y=0, width=16, height=80)}
 create_physics_tile(152, 40, right_wall_states, gravity=(0, 0))
 
 # Player
+pickle_frames = DiskLoader.load_image_grid('tiles/pickle.png', 1, 2)
+
+pickle_graphic = GraphicsObject(Point2d(0, 0), {
+    'default': GraphicsObject.create_animation(pickle_frames, 1, loop=True)})
+graphics.append(pickle_graphic)
+
 player_states = {
-    'default': Rectangle(x=0, y=0, width=16, height=16)
+    'default': Rectangle(x=72, y=88, width=16, height=16)
 }
 
-player_graphic = create_tile_graphic(72, 88)
 player = create_physics_tile(72, 88, player_states, friction=75,
                              gravity=(0, -15), terminal_velocity=(2, 100))
-player.add_listeners(on_move=player_graphic.set_position)
+player.add_listeners(on_move=pickle_graphic.set_position)
 
 
 class PlayerControls(object):
@@ -137,6 +146,9 @@ class PlayerControls(object):
 # Fine-grained player controls
 player_controls = PlayerControls(player, walk_acceleration=30, jump_height=48)
 
+key_handler.on_key_press(key.LEFT, lambda: pickle_graphic.scale_x(-1))
+key_handler.on_key_press(key.RIGHT, lambda: pickle_graphic.scale_x(1))
+
 # Player key down handlers
 key_handler.on_key_down(key.LEFT, player_controls.walk_left)
 key_handler.on_key_down(key.RIGHT, player_controls.walk_right)
@@ -156,4 +168,9 @@ def on_draw():
 
 
 if __name__ == "__main__":
+    # Enable alpha transparency in OpenGL
+    pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
+    pyglet.gl.glBlendFunc(
+        pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
+
     pyglet.app.run()
