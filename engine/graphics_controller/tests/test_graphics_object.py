@@ -1,5 +1,5 @@
 from ..graphics_object import GraphicsObject
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import Mock, patch
 import unittest
 
 
