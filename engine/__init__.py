@@ -1,6 +1,7 @@
 from .audio import AudioDirector
 from .graphics_controller import GraphicsController, GraphicsObject
 from .disk_loader import DiskLoader
+from .factory import GenericFactory
 from .geometry import Point2d, Rectangle
 from .game_objects import Tile
 from .key_handler import KeyHandler
@@ -14,6 +15,7 @@ __all__ = [
     'CollisionResolver2d',
     'DETECT_COLLISIONS',
     'DiskLoader',
+    'GenericFactory',
     'GraphicsController',
     'GraphicsObject',
     'KeyHandler',
