@@ -97,6 +97,16 @@ class GraphicsObject(object):
         """
         self.coordinates.set(coordinates)
 
+    @property
+    def batch(self):
+        """Returns the graphics batch for this graphics object."""
+        return self._sprite.batch
+
+    @batch.setter
+    def batch(self, batch):
+        """Sets the graphics batch for this object. Can be expensive."""
+        self._sprite.batch = batch
+
     @classmethod
     def create_animation(cls, frames, duration, loop=True):
         """Creates an animation from a list of images.

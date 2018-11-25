@@ -118,3 +118,19 @@ class TestGraphicsObject(unittest.TestCase):
         mock_coordinates.set.assert_called_once_with((400, 300))
 
         self.assertEqual(mock_coordinates, graphic.coordinates)
+
+    @patch('pyglet.sprite.Sprite')
+    def test_reading_batch(self, MockSprite):
+        """Batch is read from internal Sprite object."""
+        graphic = GraphicsObject(Mock(x=0, y=0), {'default': None})
+
+        self.assertEqual(MockSprite().batch, graphic.batch)
+
+    @patch('pyglet.sprite.Sprite')
+    def test_setting_batch(self, MockSprite):
+        """Batch is set on internal Sprite object."""
+        mock_batch = Mock()
+        graphic = GraphicsObject(Mock(x=0, y=0), {'default': None})
+        graphic.batch = mock_batch
+
+        self.assertEqual(mock_batch, graphic.batch)
