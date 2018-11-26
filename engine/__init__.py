@@ -7,6 +7,7 @@ from .game_objects import Tile
 from .key_handler import KeyHandler
 from .physics import Physics2d
 from .room import Room
+from .tmx_loader import TmxLoader
 from .collision import CollisionResolver2d, DETECT_COLLISIONS
 from .collision import RESOLVE_COLLISIONS
 
@@ -25,4 +26,5 @@ __all__ = [
     'RESOLVE_COLLISIONS',
     'Room',
     'Tile',
+    'TmxLoader',
 ]
