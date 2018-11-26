@@ -1,6 +1,7 @@
 from engine import AudioDirector, CollisionResolver2d, DiskLoader
-from engine import GraphicsController, GraphicsObject, KeyHandler, Physics2d
-from engine import Point2d, Rectangle, RESOLVE_COLLISIONS, Tile
+from engine import GenericFactory, GraphicsController, GraphicsObject
+from engine import KeyHandler, Physics2d, Point2d, Rectangle
+from engine import RESOLVE_COLLISIONS, Room, Tile, TmxLoader
 from pyglet.window import key
 import pyglet.app
 import pyglet.gl
@@ -16,17 +17,6 @@ audio_director.attenuation_distance = 40
 
 collision_sound = audio_director.load(
     'audio/sfx/bass-drum-hit.wav', streaming=False)
-
-tile_image = DiskLoader.load_image('tiles/test.gif')
-
-graphics = []
-
-
-def create_tile_graphic(x, y):
-    tile_graphic = GraphicsObject(Point2d(x, y), {'default': tile_image})
-    graphics.append(tile_graphic)
-
-    return tile_graphic
 
 
 def create_physics_tile(x, y, states, *args, **kwargs):
@@ -44,63 +34,59 @@ def create_physics_tile(x, y, states, *args, **kwargs):
     return tile
 
 
+def create_floor_physics(**kwargs):
+    x, y, width, height = (kwargs[k] for k in ('x', 'y', 'width', 'height'))
+
+    physics = Physics2d(mass=9999, gravity=(0, 0))
+    floor_states = {'default': Rectangle(x, y, width, height)}
+    tile = Tile(floor_states, x=x, y=y, physics=physics)
+
+    def play_collision_audio(other):
+        collision_sound.play()
+        # instance.position = (20, 0)
+
+    tile.add_listeners(on_collision=play_collision_audio)
+    pickle_graphics.add_listeners(on_update=tile.update)
+    collision_resolver.register(tile, RESOLVE_COLLISIONS)
+
+    return tile
+
+
+pickle_frames = DiskLoader.load_image_grid('tiles/pickle.png', 1, 2)
+pickle_graphic = GraphicsObject(Point2d(0, 0), {
+    'default': GraphicsObject.create_animation(pickle_frames, 1, loop=True)})
+
+player_states = {'default': Rectangle(x=0, y=0, width=16, height=16)}
+player = create_physics_tile(0, 0, player_states, friction=75,
+                             gravity=(0, -15), terminal_velocity=(2, 100))
+
+player.add_listeners(on_move=pickle_graphic.set_position)
+
+
+def position_pickle(**kwargs):
+    x, y, batch = (kwargs[k] for k in ('x', 'y', 'batch'))
+    player.set_position((x, y))
+    pickle_graphic.batch = batch
+    return pickle_graphic
+
+
+# Create factory to convert TMX object names into game objects
+pickle_factory = GenericFactory()
+pickle_factory.add_recipe('pickle', position_pickle)
+pickle_factory.add_recipe('floor', create_floor_physics)
+
+# Load the entry room from the Tiled editor save file
+entry_room_loader = TmxLoader('rooms/entry-room.tmx', pickle_factory)
+entry_room = Room(entry_room_loader.layers)
+
+
 def on_update(dt):
     collision_resolver.resolve()
     key_handler.update(dt)
-
-    for graphic in graphics:
-        graphic.update(dt)
+    entry_room.update(dt)
 
 
 pickle_graphics.add_listeners(on_update=on_update)
-
-# Floor
-create_tile_graphic(-8, 24)
-create_tile_graphic(8, 24)
-create_tile_graphic(24, 24)
-create_tile_graphic(40, 24)
-create_tile_graphic(56, 24)
-create_tile_graphic(72, 24)
-create_tile_graphic(88, 24)
-create_tile_graphic(104, 24)
-create_tile_graphic(120, 24)
-create_tile_graphic(136, 24)
-create_tile_graphic(152, 24)
-floor_states = {'default': Rectangle(x=0, y=0, width=176, height=16)}
-create_physics_tile(-8, 24, floor_states, gravity=(0, 0))
-
-# Left wall
-create_tile_graphic(-8, 40)
-create_tile_graphic(-8, 56)
-create_tile_graphic(-8, 72)
-create_tile_graphic(-8, 88)
-create_tile_graphic(-8, 104)
-left_wall_states = {'default': Rectangle(x=0, y=0, width=16, height=80)}
-create_physics_tile(-8, 40, left_wall_states, gravity=(0, 0))
-
-# Right wall
-create_tile_graphic(152, 40)
-create_tile_graphic(152, 56)
-create_tile_graphic(152, 72)
-create_tile_graphic(152, 88)
-create_tile_graphic(152, 104)
-right_wall_states = {'default': Rectangle(x=0, y=0, width=16, height=80)}
-create_physics_tile(152, 40, right_wall_states, gravity=(0, 0))
-
-# Player
-pickle_frames = DiskLoader.load_image_grid('tiles/pickle.png', 1, 2)
-
-pickle_graphic = GraphicsObject(Point2d(0, 0), {
-    'default': GraphicsObject.create_animation(pickle_frames, 1, loop=True)})
-graphics.append(pickle_graphic)
-
-player_states = {
-    'default': Rectangle(x=72, y=88, width=16, height=16)
-}
-
-player = create_physics_tile(72, 88, player_states, friction=75,
-                             gravity=(0, -15), terminal_velocity=(2, 100))
-player.add_listeners(on_move=pickle_graphic.set_position)
 
 
 class PlayerControls(object):
@@ -163,8 +149,7 @@ key_handler.on_key_release(key.UP, player_controls.cancel_jump)
 @pickle_graphics._window.event
 def on_draw():
     pickle_graphics._window.clear()
-    for graphic in graphics:
-        graphic._sprite.draw()
+    entry_room.draw()
 
 
 if __name__ == "__main__":
