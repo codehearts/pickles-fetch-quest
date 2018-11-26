@@ -1,5 +1,8 @@
+from json import load as json_load
+from defusedxml import ElementTree
 import pyglet.resource
 import pyglet.image
+import csv
 
 
 class DiskLoader(object):
@@ -73,3 +76,48 @@ class DiskLoader(object):
             A :obj:`pyglet.media.Source` for the loaded audio.
         """
         return pyglet.resource.media(filename, streaming=streaming)
+
+    @classmethod
+    def load_csv(cls, path):
+        """Loads a CSV from disk into a two dimensional list of entries.
+
+        Args:
+            path (str): Path to the CSV file, relative to the resource path.
+
+        Returns:
+            A list of entry lists, one list per each line.
+        """
+        with pyglet.resource.file(path, mode='r') as csv_file:
+            csv_data = list(csv.reader(csv_file))
+
+        return csv_data
+
+    @classmethod
+    def load_json(cls, path):
+        """Loads a JSON from disk into a dict.
+
+        Args:
+            path (str): Path to the JSON file, relative to the resource path.
+
+        Returns:
+            A dict representation of the JSON file.
+        """
+        with pyglet.resource.file(path, mode='r') as json_file:
+            json_data = json_load(json_file)
+
+        return json_data
+
+    @classmethod
+    def load_xml(cls, path):
+        """Loads an XML from disk into an :obj:`xml.etree.ElementTree`.
+
+        Args:
+            path (str): Path to the XML file, relative to the resource path.
+
+        Returns:
+            The root :obj:`xml.etree.Element` of the XML tree.
+        """
+        with pyglet.resource.file(path, mode='r') as xml_file:
+            xml_data = ElementTree.parse(xml_file)
+
+        return xml_data.getroot()
