@@ -173,4 +173,10 @@ if __name__ == "__main__":
     pyglet.gl.glBlendFunc(
         pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
 
+    # Use nearest neighbor for scaling (for crisp pixel art)
+    pyglet.gl.glTexParameteri(
+        pyglet.gl.GL_TEXTURE_2D,
+        pyglet.gl.GL_TEXTURE_MAG_FILTER,
+        pyglet.gl.GL_NEAREST)
+
     pyglet.app.run()
