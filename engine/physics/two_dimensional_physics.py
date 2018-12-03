@@ -33,7 +33,7 @@ class Physics2d(object):
         self.friction = max(min(100, friction), 1)  # Clamp between 1 and 100
         self._terminal_velocity = Point2d(*terminal_velocity)
         self._gravity = Point2d(*gravity)
-        self._mass = mass
+        self.mass = mass
 
         # Higher resolution copies for simulation
         self._velocity_1000 = self.velocity * 1000
@@ -64,7 +64,7 @@ class Physics2d(object):
                         divide_toward_zero(velocity_1000 * friction, 100))
 
         # Update velocity based on acceleration, mass, and time
-        self._velocity_1000 += (total_acceleration * self._mass * ms)
+        self._velocity_1000 += (total_acceleration * self.mass * ms)
 
         for axis in ('x', 'y'):
             velocity_1000 = getattr(self._velocity_1000, axis)
