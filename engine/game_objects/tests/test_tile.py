@@ -23,7 +23,7 @@ class TestTile(unittest.TestCase):
         }
 
         self.on_move = Mock()
-        self.tile = Tile(geometry_states, x=1, y=2)
+        self.tile = Tile(geometry_states, x=1, y=2, physics=None)
         self.tile.add_listeners(on_move=self.on_move)
 
     def test_create_tile(self):
@@ -32,7 +32,7 @@ class TestTile(unittest.TestCase):
             'default': Rectangle(x=1, y=2, width=3, height=4)
         }
 
-        tile = Tile(geometry_states, x=5, y=6)
+        tile = Tile(geometry_states, x=5, y=6, physics=None)
         self.assertEqual(5, tile.x)
         self.assertEqual(6, tile.y)
         self.assertEqual(3, tile.width)

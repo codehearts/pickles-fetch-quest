@@ -24,7 +24,7 @@ class GameObject(Rectangle, EventDispatcher):
             The other object will be passed to the listeners.
     """
 
-    def __init__(self, geometry_states, x=0, y=0, physics=None):
+    def __init__(self, geometry_states, x, y, physics):
         """Creates a new event-driven game object.
 
         Args:
@@ -38,13 +38,10 @@ class GameObject(Rectangle, EventDispatcher):
                         'default': Rectangle(0, 0, 32, 32),
                         'active': Rectangle(10, 10, 64, 128)
                     }
-            x (int, optional): The x coordinate for the game object's bottom
-                edge. Defaults to 0.
-            y (int, optional): The y coordinate for the game object's left
-                edge. Defaults to 0.
-            physics (:obj:`physics.Physics2d`, optional): Physics object for
-                the object to obey when its `update` method is called. If no
-                object is given, no physics will be used. Defaults to None.
+            x (int): The x coordinate for the game object's bottom edge.
+            y (int): The y coordinate for the game object's left edge.
+            physics (:obj:`physics.Physics2d`): Physics for the object to obey
+                when its `update` method is called.
 
         Raises:
             KeyError: If ``geometry_states`` was missing the 'default' state.
