@@ -6,14 +6,23 @@ class CollisionResolver2d(object):
     """Resolves collisions between registered two dimensional game objects.
 
     This is implemented as a sweep-and-prune algorithm.
+
+    Attributes:
+        movement_threshold (int): The minimum change in velocity during
+            collision resolution on an axis for a collision to be notified.
     """
 
-    def __init__(self):
-        """Creates a new two dimensional collision resolver."""
+    def __init__(self, movement_threshold):
+        """Creates a new two dimensional collision resolver.
+
+        Args:
+            movement_threshold (int): The minimum change in velocity during
+                collision resolution on an axis for a collision to be notified.
+        """
         super(CollisionResolver2d, self).__init__()
+        self.movement_threshold = movement_threshold
         self._registered_entries = []
         self._current_collisions = {}
-        self._previous_collisions = {}
         self._i = 0
 
     def register(self, game_object, method):
@@ -35,8 +44,6 @@ class CollisionResolver2d(object):
 
     def resolve(self):
         """Detects and resolves collisions amongst registered game objects."""
-        self._previous_collisions, self._current_collisions = \
-            self._current_collisions, self._previous_collisions
         self._current_collisions.clear()
 
         # Sort entries by the x coordinate of their geometry
@@ -62,10 +69,17 @@ class CollisionResolver2d(object):
         Returns:
             The first object passed into the narrow phase.
         """
-        # If either object is detection-only or resolution was performed
-        if DETECT_COLLISIONS in (first.method, second.method) or \
-           resolve_game_object_collision(first.geometry, second.geometry):
+        if DETECT_COLLISIONS in (first.method, second.method):
+            # If either object is detection-only, notify of the collision
             self._notify_collision(first.geometry, second.geometry)
+        else:
+            # If neither object is detection-only, resolve the collision
+            deltas = resolve_game_object_collision(
+                first.geometry, second.geometry)
+
+            # Notify the collision if enough movement was detected on any axis
+            if any(delta >= self.movement_threshold for delta in deltas):
+                self._notify_collision(first.geometry, second.geometry)
 
         return first
 
@@ -77,10 +91,8 @@ class CollisionResolver2d(object):
             second (:obj:`GameObject`): The second potential collision object.
         """
         # Only notify if these objects were not previously colliding
-        if first not in self._previous_collisions or \
-           second not in self._previous_collisions[first]:
-            first.notify_collision_with(second)
-            second.notify_collision_with(first)
+        first.notify_collision_with(second)
+        second.notify_collision_with(first)
 
         self._current_collisions.setdefault(first, []).append(second)
         self._current_collisions.setdefault(second, []).append(first)

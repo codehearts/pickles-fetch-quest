@@ -11,7 +11,7 @@ DiskLoader.set_resource_paths(['resources/'])
 audio_director = AudioDirector(master_volume=0.99)
 pickle_graphics = GraphicsController(160, 140, title="Pickle's Fetch Quest")
 key_handler = KeyHandler(pickle_graphics)
-collision_resolver = CollisionResolver2d()
+collision_resolver = CollisionResolver2d(2)
 
 audio_director.attenuation_distance = 40
 
