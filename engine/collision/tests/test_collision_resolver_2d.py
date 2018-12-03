@@ -29,7 +29,7 @@ class TestCollisionResolver2d(unittest.TestCase):
         self.resolver.register(b, RESOLVE_COLLISIONS)
         self.resolver.register(c, RESOLVE_COLLISIONS)
 
-        resolve_mock.return_value = False
+        resolve_mock.return_value = (0, 0)
         self.resolver.resolve()
 
         resolve_mock.assert_not_called()
@@ -50,7 +50,7 @@ class TestCollisionResolver2d(unittest.TestCase):
         self.resolver.register(b, RESOLVE_COLLISIONS)
         self.resolver.register(c, RESOLVE_COLLISIONS)
 
-        resolve_mock.return_value = True
+        resolve_mock.return_value = (1, 2)
         self.resolver.resolve()
 
         self.assertEqual(3, resolve_mock.call_count)
@@ -79,7 +79,7 @@ class TestCollisionResolver2d(unittest.TestCase):
         self.resolver.register(b, RESOLVE_COLLISIONS)
         self.resolver.register(c, RESOLVE_COLLISIONS)
 
-        resolve_mock.return_value = True
+        resolve_mock.return_value = (1, 2)
         self.resolver.resolve()
 
         self.assertEqual(2, resolve_mock.call_count)

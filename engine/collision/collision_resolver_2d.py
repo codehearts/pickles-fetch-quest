@@ -62,10 +62,12 @@ class CollisionResolver2d(object):
         Returns:
             The first object passed into the narrow phase.
         """
+        first_shape, second_shape = first.geometry, second.geometry
+
         # If either object is detection-only or resolution was performed
         if DETECT_COLLISIONS in (first.method, second.method) or \
-           resolve_game_object_collision(first.geometry, second.geometry):
-            self._notify_collision(first.geometry, second.geometry)
+           resolve_game_object_collision(first_shape, second_shape) != (0, 0):
+            self._notify_collision(first_shape, second_shape)
 
         return first
 

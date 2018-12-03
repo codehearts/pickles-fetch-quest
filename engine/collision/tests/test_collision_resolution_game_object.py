@@ -19,8 +19,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
         second = Mock(physics=Mock(velocity=Mock()))
 
         mock_2d_detect.return_value = False
-        self.assertFalse(resolve_game_object_collision(first, second),
-                         "True returned when no overlap exists")
+        self.assertEqual((0, 0), resolve_game_object_collision(first, second))
 
         mock_2d_detect.assert_called_once_with(first, second)
         mock_x_resolve.assert_not_called()
@@ -35,13 +34,14 @@ class TestResolveGameObjectCollision(unittest.TestCase):
                               mock_y_resolve):
         """First object moves when mass is less than second's."""
         first = Mock(x=1, y=2, width=3, height=4,
-                     physics=Mock(mass=1, velocity=Mock(x=1, y=1)))
+                     physics=Mock(mass=1, velocity=Mock(x=1, y=2)))
         second = Mock(x=1, y=2, width=3, height=4,
-                      physics=Mock(mass=2, velocity=Mock(x=2, y=2)))
+                      physics=Mock(mass=2, velocity=Mock(x=1, y=2)))
 
         mock_2d_detect.return_value = True
-        self.assertTrue(resolve_game_object_collision(first, second),
-                        "False returned when collision was resolved")
+        mock_x_resolve.return_value = 1
+        mock_y_resolve.return_value = 2
+        self.assertEqual((1, 2), resolve_game_object_collision(first, second))
 
         mock_2d_detect.assert_called_once()
         mock_x_resolve.assert_called_once_with(first, second)
@@ -57,13 +57,14 @@ class TestResolveGameObjectCollision(unittest.TestCase):
                                   mock_y_resolve):
         """First object moves when mass is equal to second's."""
         first = Mock(x=1, y=2, width=3, height=4,
-                     physics=Mock(mass=1, velocity=Mock(x=-1, y=1)))
+                     physics=Mock(mass=1, velocity=Mock(x=-1, y=2)))
         second = Mock(x=1, y=2, width=3, height=4,
-                      physics=Mock(mass=1, velocity=Mock(x=1, y=-1)))
+                      physics=Mock(mass=1, velocity=Mock(x=1, y=2)))
 
         mock_2d_detect.return_value = True
-        self.assertTrue(resolve_game_object_collision(first, second),
-                        "False returned when collision was resolved")
+        mock_x_resolve.return_value = 1
+        mock_y_resolve.return_value = 2
+        self.assertEqual((1, 2), resolve_game_object_collision(first, second))
 
         mock_2d_detect.assert_called_once()
         mock_x_resolve.assert_called_once_with(first, second)
@@ -79,13 +80,14 @@ class TestResolveGameObjectCollision(unittest.TestCase):
                               mock_y_resolve):
         """Second object moves when mass is less than first's."""
         first = Mock(x=1, y=2, width=3, height=4,
-                     physics=Mock(mass=2, velocity=Mock(x=-2, y=-2)))
+                     physics=Mock(mass=2, velocity=Mock(x=-1, y=-2)))
         second = Mock(x=1, y=2, width=3, height=4,
-                      physics=Mock(mass=1, velocity=Mock(x=1, y=1)))
+                      physics=Mock(mass=1, velocity=Mock(x=1, y=2)))
 
         mock_2d_detect.return_value = True
-        self.assertTrue(resolve_game_object_collision(first, second),
-                        "False returned when collision was resolved")
+        mock_x_resolve.return_value = 1
+        mock_y_resolve.return_value = 2
+        self.assertEqual((1, 2), resolve_game_object_collision(first, second))
 
         mock_2d_detect.assert_called_once()
         mock_x_resolve.assert_called_once_with(second, first)
@@ -112,7 +114,8 @@ class TestResolveGameObjectCollision(unittest.TestCase):
 
         # Resolve the objects along the x axis
         mock_1d_detect.return_value = True
-        resolve_game_object_x_collision(moving, resting)
+        mock_1d_resolve.return_value = 3
+        self.assertEqual(10, resolve_game_object_x_collision(moving, resting))
 
         # Resolution was performed with correct dimensions
         mock_1d_detect.assert_called_once_with(-18, 4, 2, 4)
@@ -156,7 +159,8 @@ class TestResolveGameObjectCollision(unittest.TestCase):
 
         # Resolve the objects along the y axis
         mock_1d_detect.return_value = True
-        resolve_game_object_y_collision(moving, resting)
+        mock_1d_resolve.return_value = 4
+        self.assertEqual(20, resolve_game_object_y_collision(moving, resting))
 
         # Resolution was performed with correct dimensions
         mock_1d_detect.assert_called_once_with(1, 3, 1, 3)
@@ -192,7 +196,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
 
         # Resolve the objects along the x axis
         mock_1d_detect.return_value = False
-        resolve_game_object_x_collision(moving, resting)
+        self.assertEqual(0, resolve_game_object_x_collision(moving, resting))
 
         mock_1d_detect.assert_called_once_with(-3, 4, 20, 40)
         mock_1d_resolve.assert_not_called()
@@ -216,7 +220,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
         # Resolve the objects along the x axis
         mock_1d_detect.return_value = True
         mock_1d_resolve.return_value = -2
-        resolve_game_object_x_collision(moving, resting)
+        self.assertEqual(5, resolve_game_object_x_collision(moving, resting))
 
         # Resolution was performed with correct dimensions
         mock_1d_detect.assert_called_once_with(-4, 4, 2, 4)
@@ -239,7 +243,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
 
         # Resolve the objects along the y axis
         mock_1d_detect.return_value = False
-        resolve_game_object_y_collision(moving, resting)
+        self.assertEqual(0, resolve_game_object_y_collision(moving, resting))
 
         mock_1d_detect.assert_called_once_with(1, 3, 10, 30)
         mock_1d_resolve.assert_not_called()
@@ -263,7 +267,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
         # Resolve the objects along the y axis
         mock_1d_detect.return_value = True
         mock_1d_resolve.return_value = -2
-        resolve_game_object_y_collision(moving, resting)
+        self.assertEqual(5, resolve_game_object_y_collision(moving, resting))
 
         # Resolution was performed with correct dimensions
         mock_1d_detect.assert_called_once_with(1, 3, 1, 3)
