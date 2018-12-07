@@ -3,8 +3,7 @@ from engine import geometry
 
 
 def get_nonoverlapping_coordinates_2d(first, first_velocity, second):
-    """Returns new coordinates for the first rectangle to resolve a
-    2d collision.
+    """Returns coordinates for the first rectangle to resolve a 2d collision.
 
     Args:
         first (:obj:`engine.geometry.Rectangle`):
@@ -21,17 +20,35 @@ def get_nonoverlapping_coordinates_2d(first, first_velocity, second):
     """
     x = first.x
     y = first.y
-    y_pv = first.y - first_velocity.y  # previous y coordinate of first object
 
     # Detect overlap before applying velocity along y axis, but after x axis
-    if geometry.detect_overlap_1d(y_pv, first.height, second.y, second.height):
+    if _detect_overlap(first.y - first_velocity.y, first, second, 'y'):
         # Overlap detected along y-axis, resolve collision on x-axis
-        x = get_nonoverlapping_coordinate_1d(first.x, first.width,
-                                             first_velocity.x,
-                                             second.x, second.width)
-    if geometry.detect_overlap_1d(x, first.width, second.x, second.width):
+        x = _get_coordinate(first, second, first_velocity, 'x')
+
+    if _detect_overlap(x, first, second, 'x'):
         # Overlap detected along x-axis, resolve collision on y-axis
-        y = get_nonoverlapping_coordinate_1d(first.y, first.height,
-                                             first_velocity.y,
-                                             second.y, second.height)
+        y = _get_coordinate(first, second, first_velocity, 'y')
+
     return (x, y)
+
+
+def _detect_overlap(first_axis, first, second, axis):
+    """Returns whether the first overlaps the second on the axis."""
+    dimension = 'width' if axis == 'x' else 'height'
+
+    axis2 = getattr(second, axis)
+    size1, size2 = getattr(first, dimension), getattr(second, dimension)
+
+    return geometry.detect_overlap_1d(first_axis, size1, axis2, size2)
+
+
+def _get_coordinate(first, second, first_velocity, axis):
+    """Returns a new coordinate for the first object on the axis."""
+    dimension = 'width' if axis == 'x' else 'height'
+
+    axis1, axis2 = getattr(first, axis), getattr(second, axis)
+    size1, size2 = getattr(first, dimension), getattr(second, dimension)
+    speed = getattr(first_velocity, axis)
+
+    return get_nonoverlapping_coordinate_1d(axis1, size1, speed, axis2, size2)
