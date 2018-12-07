@@ -1,5 +1,4 @@
 from .audio import AudioDirector
-from .graphics_controller import GraphicsController, GraphicsObject
 from .disk_loader import DiskLoader
 from .factory import GenericFactory
 from .geometry import Point2d, Rectangle
@@ -17,8 +16,6 @@ __all__ = [
     'DETECT_COLLISIONS',
     'DiskLoader',
     'GenericFactory',
-    'GraphicsController',
-    'GraphicsObject',
     'KeyHandler',
     'Point2d',
     'Physics2d',

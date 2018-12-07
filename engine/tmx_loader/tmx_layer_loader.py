@@ -1,8 +1,8 @@
 from .tmx_object_layer import load_tmx_object_layer
 from .tmx_tile_layer import load_tmx_tile_layer
-from ..graphics_controller import GraphicsBatch, GraphicsObject
 from ..geometry import Point2d
 from ..room import RoomLayer
+from engine import graphics
 
 
 class TmxLayerLoader(object):
@@ -27,7 +27,7 @@ class TmxLayerLoader(object):
         """
         super(TmxLayerLoader, self).__init__()
 
-        self.layer = RoomLayer(batch=GraphicsBatch())
+        self.layer = RoomLayer(batch=graphics.GraphicsBatch())
         self.name = layer_node.attrib['name']
 
         self._layer_node = layer_node
@@ -66,7 +66,8 @@ class TmxLayerLoader(object):
             state = {'default': self._tileset[tileset_index]}
 
             self.layer.add_object(
-                GraphicsObject(coordinates, state, batch=self.layer.batch))
+                graphics.GraphicsObject(
+                    coordinates, state, batch=self.layer.batch))
 
     def _load_object_layer(self):
         """Creates objects using the factory and adds them to the layer."""
