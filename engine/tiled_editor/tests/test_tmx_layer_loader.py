@@ -8,9 +8,9 @@ import unittest
 class TestTmxLayer(unittest.TestCase):
     """Test loading TMX layers."""
 
-    @patch('engine.tmx_loader.tmx_layer_loader.load_tmx_tile_layer')
+    @patch('engine.tiled_editor.tmx_layer_loader.load_tmx_tile_layer')
     @patch('engine.graphics.GraphicsObject')
-    @patch('engine.tmx_loader.tmx_layer_loader.RoomLayer')
+    @patch('engine.tiled_editor.tmx_layer_loader.RoomLayer')
     def test_graphics_are_created_for_tile_layers(self, MockLayer,
                                                   MockGraphics,
                                                   mock_load_tile_layer):
@@ -53,9 +53,9 @@ class TestTmxLayer(unittest.TestCase):
         self.assertEqual('test', loader.name)
         self.assertEqual(MockLayer(), loader.layer)
 
-    @patch('engine.tmx_loader.tmx_layer_loader.load_tmx_object_layer')
+    @patch('engine.tiled_editor.tmx_layer_loader.load_tmx_object_layer')
     @patch('engine.graphics.GraphicsObject')
-    @patch('engine.tmx_loader.tmx_layer_loader.RoomLayer')
+    @patch('engine.tiled_editor.tmx_layer_loader.RoomLayer')
     def test_graphics_are_created_for_obj_layers(self, MockLayer, MockGraphics,
                                                  mock_load_object_layer):
         """Objects are created when loading object layers."""
