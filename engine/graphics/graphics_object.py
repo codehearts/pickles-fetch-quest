@@ -77,7 +77,7 @@ class GraphicsObject(object):
             scale (int): The horizontal scaling to apply.
         """
         self._scale[0] = scale
-        self._offset[0] = abs(scale) * self._sprite.width if scale < 0 else 0
+        self._set_scale_offset(scale, 0)
 
     def scale_y(self, scale):
         """Sets the vertical scaling of the graphic.
@@ -88,7 +88,14 @@ class GraphicsObject(object):
             scale (int): The vertical scaling to apply.
         """
         self._scale[1] = scale
-        self._offset[1] = abs(scale) * self._sprite.height if scale < 0 else 0
+        self._set_scale_offset(scale, 1)
+
+    def _set_scale_offset(self, scale, index):
+        """Maintains a bottom-left anchor by offsetting the sprite."""
+        dimension = 'width' if index == 0 else 'height'
+        sprite_dimension = getattr(self._sprite, dimension)
+
+        self._offset[index] = abs(scale) * sprite_dimension if scale < 0 else 0
 
     def set_position(self, coordinates):
         """Sets the position of the graphic's lower left corner on-screen.
