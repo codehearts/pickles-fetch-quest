@@ -9,7 +9,7 @@ class TestGetNonOverlappingCoordinates2d(unittest.TestCase):
     collision_2d_module = 'engine.collision.collision_resolution_2d'
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_2d_no_overlap(self, mock_1d_detect, mock_1d_resolution):
         """First rectangle is not moved if no overlap exists."""
         # Before    Current   After
@@ -46,7 +46,7 @@ class TestGetNonOverlappingCoordinates2d(unittest.TestCase):
         mock_1d_resolution.assert_not_called()
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_2d_overlap_on_y_not_x(self, mock_1d_detect, mock_1d_resolution):
         """First rectangle is moved on x-axis if overlap exists on y-axis."""
         # Before    Current   After
@@ -88,7 +88,7 @@ class TestGetNonOverlappingCoordinates2d(unittest.TestCase):
                                                    second.x, second.width)
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_2d_overlap_on_x_not_y(self, mock_1d_detect, mock_1d_resolution):
         """First rectangle is moved on y-axis if overlap exists on x-axis."""
         # Before    Current   After

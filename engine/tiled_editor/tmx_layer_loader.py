@@ -1,33 +1,32 @@
 from .tmx_object_layer import load_tmx_object_layer
 from .tmx_tile_layer import load_tmx_tile_layer
-from ..graphics_controller import GraphicsBatch, GraphicsObject
-from ..geometry import Point2d
-from ..room import RoomLayer
+from engine import geometry, graphics, room
 
 
 class TmxLayerLoader(object):
-    """Creates a :obj:`RoomLayer` from a TMX layer node.
+    """Creates a :obj:`engine.room.RoomLayer` from a TMX layer node.
 
     Attributes:
-        layer (:obj:`RoomLayer`): Layer created from the TMX node.
+        layer (:obj:`engine.room.RoomLayer`): Layer created from the TMX node.
         name (str): Name of the layer from the TMX node.
     """
 
     def __init__(self, layer_node, map_node, tileset, object_factory):
-        """Loads a :obj:`RoomLayer` from a TMX layer node.
+        """Loads a :obj:`engine.room.RoomLayer` from a TMX layer node.
 
         Supported TMX layer nodes are "layer" and "objectgroup".
 
         Args:
             layer_node (:obj:`xml.etree.Element`): TMX layer node.
             map_node (:obj:`xml.etree.Element`): TMX map node.
-            tileset (dict of int to :obj:`AbstractImage`): Tileset for the map.
-            object_factory (:obj:`GenericFactory`): Factory to create objects
-                from names in the TMX layer.
+            tileset (dict of int to :obj:`pyglet.image.AbstractImage`):
+                Tileset for the map.
+            object_factory (:obj:`engine.factory.GenericFactory`):
+                Factory to create objects from names in the TMX layer.
         """
         super(TmxLayerLoader, self).__init__()
 
-        self.layer = RoomLayer(batch=GraphicsBatch())
+        self.layer = room.RoomLayer(batch=graphics.GraphicsBatch())
         self.name = layer_node.attrib['name']
 
         self._layer_node = layer_node
@@ -62,11 +61,12 @@ class TmxLayerLoader(object):
         for tile_spec in filtered_tiles:
             x, y, tileset_index = tile_spec
 
-            coordinates = Point2d(x, y) * self._tile_size
+            coordinates = geometry.Point2d(x, y) * self._tile_size
             state = {'default': self._tileset[tileset_index]}
 
             self.layer.add_object(
-                GraphicsObject(coordinates, state, batch=self.layer.batch))
+                graphics.GraphicsObject(
+                    coordinates, state, batch=self.layer.batch))
 
     def _load_object_layer(self):
         """Creates objects using the factory and adds them to the layer."""

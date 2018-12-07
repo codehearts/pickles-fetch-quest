@@ -2,14 +2,16 @@ class Room(object):
     """Collection of rendering layers and objects.
 
     Attributes:
-        layers (:obj:`RoomLayerCollection`): Collection of layers for the room.
+        layers (:obj:`engine.room.RoomLayerCollection`):
+            Collection of layers for the room.
     """
 
     def __init__(self, layers):
         """Creates a new room.
 
         Args:
-            layers (:obj:`RoomLayerCollection`): Layers for the room.
+            layers (:obj:`engine.room.RoomLayerCollection`):
+                Layers for the room.
         """
         super(Room, self).__init__()
         self.layers = layers

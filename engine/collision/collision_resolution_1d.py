@@ -1,4 +1,4 @@
-from ..geometry import detect_overlap_1d
+from engine import geometry
 
 
 def get_nonoverlapping_coordinate_1d(first, first_length, first_velocity,
@@ -15,7 +15,10 @@ def get_nonoverlapping_coordinate_1d(first, first_length, first_velocity,
     Returns:
         A new beginning for the first line to remove the overlap.
     """
-    if not detect_overlap_1d(first, first_length, second, second_length):
+    has_overlap = geometry.detect_overlap_1d(
+        first, first_length, second, second_length)
+
+    if not has_overlap:
         # Lines do not overlap, first line can stay where it is
         return first
     elif first_velocity < 0:

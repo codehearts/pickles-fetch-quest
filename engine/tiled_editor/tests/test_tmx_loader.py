@@ -8,7 +8,7 @@ import unittest
 class TestTmxLoader(unittest.TestCase):
     """Test loading TMX files."""
 
-    @patch('engine.tmx_loader.tmx_loader.DiskLoader')
+    @patch('engine.disk.DiskLoader')
     def test_older_versions_raise_exception(self, MockDiskLoader):
         """Older TMX formats raise an exception."""
         # Version 1.1 is too old
@@ -19,7 +19,7 @@ class TestTmxLoader(unittest.TestCase):
         with self.assertRaises(AttributeError):
             TmxLoader('map.tmx', None)
 
-    @patch('engine.tmx_loader.tmx_loader.DiskLoader')
+    @patch('engine.disk.DiskLoader')
     def test_non_orthogonal_maps_raise_exception(self, MockDiskLoader):
         """Orthogonal maps raise an exception."""
         # Map is not orthogonal
@@ -30,7 +30,7 @@ class TestTmxLoader(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             TmxLoader('map.tmx', None)
 
-    @patch('engine.tmx_loader.tmx_loader.DiskLoader')
+    @patch('engine.disk.DiskLoader')
     def test_infinite_maps_raise_exception(self, MockDiskLoader):
         """Infinite maps raise an exception."""
         # Map is infinite
@@ -41,9 +41,9 @@ class TestTmxLoader(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             TmxLoader('map.tmx', None)
 
-    @patch('engine.tmx_loader.tmx_loader.load_tmx_tileset')
-    @patch('engine.tmx_loader.tmx_loader.TmxLayerLoader')
-    @patch('engine.tmx_loader.tmx_loader.DiskLoader')
+    @patch('engine.tiled_editor.tmx_loader.load_tmx_tileset')
+    @patch('engine.tiled_editor.tmx_loader.TmxLayerLoader')
+    @patch('engine.disk.DiskLoader')
     def test_tile_layers_use_tilesets(self, MockDiskLoader, MockLayerLoader,
                                       mock_load_tileset):
         """Tile layers are loaded using the loaded tilesets."""
@@ -83,8 +83,8 @@ class TestTmxLoader(unittest.TestCase):
         self.assertEqual(
             MockLayerLoader().layer, tmx_loader.layers.get_layer('test'))
 
-    @patch('engine.tmx_loader.tmx_loader.TmxLayerLoader')
-    @patch('engine.tmx_loader.tmx_loader.DiskLoader')
+    @patch('engine.tiled_editor.tmx_loader.TmxLayerLoader')
+    @patch('engine.disk.DiskLoader')
     def test_object_layers_are_loaded(self, MockDiskLoader, MockLayerLoader):
         """Tile layers are loaded using the loaded tilesets."""
         mock_xml = '<map version="1.2" orientation="orthogonal" '

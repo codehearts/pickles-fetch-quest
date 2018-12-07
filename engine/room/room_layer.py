@@ -2,14 +2,16 @@ class RoomLayer(object):
     """Object layer within a room.
 
     Attributes:
-        batch (:obj:`GraphicsBatch`): Rendering batch for objects on the layer.
+        batch (:obj:`engine.graphics.GraphicsBatch`):
+            Rendering batch for objects on the layer.
     """
 
     def __init__(self, batch=None):
         """Creates a new layer for a room.
 
         Kwargs:
-            batch (:obj:`GraphicsBatch`, optional): Batch for the layer.
+            batch (:obj:`engine.graphics.GraphicsBatch`, optional):
+                Batch for the layer.
         """
         super(RoomLayer, self).__init__()
         self.batch = batch

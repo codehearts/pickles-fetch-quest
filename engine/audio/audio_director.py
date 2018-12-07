@@ -1,5 +1,5 @@
-from ..disk_loader import DiskLoader
 from .audio_source import AudioSource
+from engine import disk
 import pyglet.media
 
 
@@ -67,7 +67,7 @@ class AudioDirector(object):
         """
         # Load the file from disk and cache it if necessary
         if filepath not in self._disk_cache:
-            disk_file = DiskLoader.load_audio(filepath, streaming)
+            disk_file = disk.DiskLoader.load_audio(filepath, streaming)
             new_source = AudioSource(disk_file, streaming)
 
             # Cache the new source

@@ -1,30 +1,30 @@
 from distutils.version import StrictVersion
 from .tmx_layer_loader import TmxLayerLoader
 from .tmx_tileset import load_tmx_tileset
-from ..room import RoomLayerCollection
-from ..disk_loader import DiskLoader
+from engine import disk, room
 
 
 class TmxLoader(object):
     """Loads a TMX file from disk into graphical objects and room layers.
 
     Attributes:
-        layers (:obj:`RoomLayerCollection`): Collection of layers from the map.
+        layers (:obj:`engine.room.RoomLayerCollection`):
+            Collection of layers from the map.
     """
 
     def __init__(self, tmx_path, object_factory):
-        """Loads a TMX map file from disk into layers for a :obj:`Room`.
+        """Loads a TMX file from disk to layers for a :obj:`engine.room.Room`.
 
         Args:
             tmx_path (str): Path to the TMX file, relative to the
-                :obj:`DiskLoader` resource path.
-            object_factory (:obj:`GenericFactory`): An object factory to
-                convert TMX object names into Python objects.
+                :obj:`engine.disk.DiskLoader` resource path.
+            object_factory (:obj:`engine.factory.GenericFactory`):
+                An factory to convert TMX object names into Python objects.
         """
         super(TmxLoader, self).__init__()
 
         # Get the root map node from the TMX file
-        self._map_node = DiskLoader.load_xml(tmx_path)
+        self._map_node = disk.DiskLoader.load_xml(tmx_path)
         map_attr = self._map_node.attrib
 
         if StrictVersion(map_attr['version']) < StrictVersion('1.2'):
@@ -38,7 +38,7 @@ class TmxLoader(object):
         if map_attr['infinite'] != '0':
             raise NotImplementedError('Infinite maps are not supported')
 
-        self.layers = RoomLayerCollection()
+        self.layers = room.RoomLayerCollection()
 
         self._object_factory = object_factory
         self._path = tmx_path
@@ -54,7 +54,7 @@ class TmxLoader(object):
         """Parses a node from a TMX file into the relevant object.
 
         Tileset elements are parsed into a map of tileset indices to graphics.
-        Layer indices are parsed into :obj:`RoomLayer` objects.
+        Layer indices are parsed into :obj:`engine.room.RoomLayer` objects.
 
         Args:
             node (:obj:`xml.etree.Element`): The TMX file node to parse.

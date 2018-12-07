@@ -1,9 +1,9 @@
-from ..event_dispatcher import EventDispatcher
+from engine import event_dispatcher
 import pyglet.clock
 import pyglet.window
 
 
-class GraphicsController(EventDispatcher):
+class GraphicsController(event_dispatcher.EventDispatcher):
     """Controller for graphical output to a desktop window.
 
     Events:
@@ -18,7 +18,7 @@ class GraphicsController(EventDispatcher):
         Args:
             width (int): The width of the window.
             height (int): The height of the window.
-            title (:obj:`str`, optional): Text to display in title bar.
+            title (str, optional): Text to display in title bar.
                 Defaults to None.
             resizeable (bool, optional): Allows the user to resize the window.
                 Defaults to False.

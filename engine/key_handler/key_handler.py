@@ -8,8 +8,8 @@ class KeyHandler(object):
         """Creates a new key handler attached to a graphics controller.
 
         Args:
-            graphics_controller (:obj:`GraphicsController`): The graphics
-                controller owning the window to handle key events for.
+            graphics_controller (:obj:`engine.graphics.GraphicsController`):
+                The graphics controller for the window to handle key events.
         """
         super(KeyHandler, self).__init__()
         self._key_handler = window.key.KeyStateHandler()

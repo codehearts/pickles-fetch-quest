@@ -32,7 +32,7 @@ class Point2d(object):
         If `other` is a number, both coordinates will be assigned to it.
 
         Args:
-            other (:obj:`Object`): The value to assign this point to.
+            other (:obj:`object`): The value to assign this point to.
         """
         try:
             self.x, self.y = other.x, other.y
@@ -78,7 +78,7 @@ class Point2d(object):
             fn (callable): Function to call with an individual coordinate
                 and `other`. Will be called with `self.x` and `other` before
                 `self.y` and `other`.
-            other (:obj:`Object`): The other object to pass to the function.
+            other (:obj:`object`): The other object to pass to the function.
 
         Returns:
             A tuple of the return values of the function when called with
@@ -98,7 +98,7 @@ class Point2d(object):
         """Determines if this point is equal to another object.
 
         Args:
-            other (:obj:`Object`): The value to compare against the point.
+            other (:obj:`object`): The value to compare against the point.
         """
         equalities = self._call_with_other(operator.eq, other)
         return equalities[0] and equalities[1]
@@ -107,7 +107,7 @@ class Point2d(object):
         """Determines if this point is not equal to another object.
 
         Args:
-            other (:obj:`Object`): The value to compare against the point.
+            other (:obj:`object`): The value to compare against the point.
         """
         equalities = self._call_with_other(operator.ne, other)
         return equalities[0] or equalities[1]
@@ -124,7 +124,7 @@ class Point2d(object):
         If `other` is a number, it will be added to both coordinates.
 
         Args:
-            other (:obj:`Object`): The value to add to the point.
+            other (:obj:`object`): The value to add to the point.
         """
         return Point2d(*self._call_with_other(operator.add, other))
 
@@ -140,7 +140,7 @@ class Point2d(object):
         If `other` is a number, it will be subtracted from both coordinates.
 
         Args:
-            other (:obj:`Object`): The value to subtract from the point.
+            other (:obj:`object`): The value to subtract from the point.
         """
         return Point2d(*self._call_with_other(operator.sub, other))
 
@@ -156,7 +156,7 @@ class Point2d(object):
         If `other` is a number, both coordinates will be multiplied by it.
 
         Args:
-            other (:obj:`Object`): The value to multiply the point by.
+            other (:obj:`object`): The value to multiply the point by.
         """
         return Point2d(*self._call_with_other(operator.mul, other))
 
@@ -172,7 +172,7 @@ class Point2d(object):
         If `other` is a number, both coordinates will be divided by it.
 
         Args:
-            other (:obj:`Object`): The value to divide the point by.
+            other (:obj:`object`): The value to divide the point by.
         """
         return Point2d(*self._call_with_other(operator.floordiv, other))
 
@@ -182,7 +182,7 @@ class Point2d(object):
         See :fn:`__add__` for documentation on how `other` will be processed.
 
         Args:
-            other (:obj:`Object`): The value to add to the point.
+            other (:obj:`object`): The value to add to the point.
         """
         self.x, self.y = self._call_with_other(operator.add, other)
         return self
@@ -193,7 +193,7 @@ class Point2d(object):
         See :fn:`__mul__` for documentation on how `other` will be processed.
 
         Args:
-            other (:obj:`Object`): The value to multiply the point by.
+            other (:obj:`object`): The value to multiply the point by.
         """
         self.x, self.y = self._call_with_other(operator.mul, other)
         return self
@@ -206,7 +206,7 @@ class Point2d(object):
         processed.
 
         Args:
-            other (:obj:`Object`): The value to divide the point by.
+            other (:obj:`object`): The value to divide the point by.
         """
         self.x, self.y = self._call_with_other(operator.floordiv, other)
         return self

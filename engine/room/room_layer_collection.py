@@ -14,7 +14,8 @@ class RoomLayerCollection(object):
 
         Args:
             name (str): Name of the layer, for easy access.
-            layer (:obj:`RoomLayer`): Layer to add to the collection.
+            layer (:obj:`engine.room.RoomLayer`):
+                Layer to add to the collection.
         """
         self._layers[name] = layer
 
@@ -25,7 +26,7 @@ class RoomLayerCollection(object):
             name (str): Name of the layer.
 
         Returns:
-            The :obj:`RoomLayer` with the given name.
+            The :obj:`engine.room.RoomLayer` with the given name.
         """
         return self._layers[name]
 

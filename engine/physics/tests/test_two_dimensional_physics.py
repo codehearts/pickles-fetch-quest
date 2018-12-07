@@ -10,7 +10,8 @@ class TestPhysics2d(unittest.TestCase):
 
         Args:
             expected_coordinates (tuple of int): Expected coordinates.
-            point (:obj:`Point2d`): The point to assert against.
+            point (:obj:`engine.geometry.Point2d`):
+                The point to assert against.
         """
         self.assertEqual(expected_coordinates[0], point.x)
         self.assertEqual(expected_coordinates[1], point.y)

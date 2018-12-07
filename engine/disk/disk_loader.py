@@ -13,8 +13,8 @@ class DiskLoader(object):
         """Sets the paths to load resources from.
 
         Args:
-            resource_path (list of :obj:`str`): Paths relative to __main__
-                to load resources from.
+            resource_path (list of str):
+                Paths relative to __main__ to load resources from.
         """
         pyglet.resource.path = resource_paths
         pyglet.resource.reindex()  # Refresh the path index
@@ -24,8 +24,8 @@ class DiskLoader(object):
         """Loads an image file from disk.
 
         Args:
-            filename (:obj:`str`): The name of the image file, relative to
-                the resource path.
+            filename (str):
+                The name of the image file, relative to the resource path.
 
         Returns:
             A :obj:`pyglet.image.Texture` for the loaded image.
@@ -37,8 +37,8 @@ class DiskLoader(object):
         """Loads an image grid file from disk, such as a sprite sheet.
 
         Args:
-            filename (:obj:`str`): The name of the image file, relative to
-                the resource path.
+            filename (str):
+                The name of the image file, relative to the resource path.
             rows (int): Number of rows in the image grid.
             columns (int): Number of columns in the image grid.
 
@@ -63,8 +63,8 @@ class DiskLoader(object):
         """Loads an audio file from disk.
 
         Args:
-            filename (:obj:`str`): The name of the audio file, relative to
-                the resource path.
+            filename (str):
+                The name of the audio file, relative to the resource path.
 
         Kwargs:
             streaming (bool, optional): True to stream audio from disk rather

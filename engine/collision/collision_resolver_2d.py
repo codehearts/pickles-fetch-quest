@@ -1,5 +1,6 @@
-from .collision_resolver_entry import DETECT_COLLISIONS, CollisionResolverEntry
 from .collision_resolution_game_object import resolve_game_object_collision
+from .collision_resolver_entry import CollisionResolverEntry
+from engine import collision
 
 
 class CollisionResolver2d(object):
@@ -29,10 +30,10 @@ class CollisionResolver2d(object):
         """Registers a game object to be resolved using the given method.
 
         Args:
-            game_object (:obj:`GameObject`): The game object to resolve
-                                             collisions against.
+            game_object (:obj:`engine.game_object.GameObject`):
+                The game object to resolve collisions against.
             method (int): The method for resolving collisions with this object.
-                          One of ``engine.DETECT_COLLISIONS`` or
+                          One of ``engine.collisions.DETECT_COLLISIONS`` or
                           ``engine.RESOLVE_COLLISIONS``. An exception is
                           raised for any other value.
 
@@ -63,13 +64,15 @@ class CollisionResolver2d(object):
         This operation will move one or both objects.
 
         Args:
-            first (:obj:`GameObject`): The first potential collision object.
-            second (:obj:`GameObject`): The second potential collision object.
+            first (:obj:`engine.game_object.GameObject`):
+                The first potential collision object.
+            second (:obj:`engine.game_object.GameObject`):
+                The second potential collision object.
 
         Returns:
             The first object passed into the narrow phase.
         """
-        if DETECT_COLLISIONS in (first.method, second.method):
+        if collision.DETECT_COLLISIONS in (first.method, second.method):
             # If either object is detection-only, notify of the collision
             self._notify_collision(first.geometry, second.geometry)
         else:
@@ -87,8 +90,10 @@ class CollisionResolver2d(object):
         """Notifies collision if the objects weren't already colliding.
 
         Args:
-            first (:obj:`GameObject`): The first potential collision object.
-            second (:obj:`GameObject`): The second potential collision object.
+            first (:obj:`engine.game_object.GameObject`):
+                The first potential collision object.
+            second (:obj:`engine.game_object.GameObject`):
+                The second potential collision object.
         """
         # Only notify if these objects were not previously colliding
         first.notify_collision_with(second)
@@ -97,17 +102,17 @@ class CollisionResolver2d(object):
         self._current_collisions.setdefault(first, []).append(second)
         self._current_collisions.setdefault(second, []).append(first)
 
-    def _is_swept_past(self, prior_entry, new_entry):
+    def _is_swept_past(self, old_entry, new_entry):
         """Determines if the new entry has swept past the prior entry.
 
         Args:
-            prior_entry (:obj:`CollisionResolverEntry`): The prior entry
-                                                         in the sweep list.
-            new_entry (:obj:`CollisionResolverEntry`): The new entry into
-                                                       the sweep list.
+            old_entry (:obj:`collision_resolver_entry.CollisionResolverEntry`):
+                The prior entry in the sweep list.
+            new_entry (:obj:`collision_resolver_entry.CollisionResolverEntry`):
+                The new entry into the sweep list.
 
         Returns:
             True if the prior entry has been swept past, false otherwise.
         """
-        prior_endpoint = prior_entry.geometry.x + prior_entry.geometry.width
+        prior_endpoint = old_entry.geometry.x + old_entry.geometry.width
         return prior_endpoint <= new_entry.geometry.x

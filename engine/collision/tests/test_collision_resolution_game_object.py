@@ -12,7 +12,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
 
     @patch(collision_2d_module + '.resolve_game_object_y_collision')
     @patch(collision_2d_module + '.resolve_game_object_x_collision')
-    @patch(collision_2d_module + '.detect_overlap_2d')
+    @patch('engine.geometry.detect_overlap_2d')
     def test_no_overlap(self, mock_2d_detect, mock_x_resolve, mock_y_resolve):
         """No work is performed if neither object overlaps."""
         first = Mock(physics=Mock(velocity=Mock()))
@@ -29,7 +29,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
 
     @patch(collision_2d_module + '.resolve_game_object_y_collision')
     @patch(collision_2d_module + '.resolve_game_object_x_collision')
-    @patch(collision_2d_module + '.detect_overlap_2d')
+    @patch('engine.geometry.detect_overlap_2d')
     def test_first_is_lighter(self, mock_2d_detect, mock_x_resolve,
                               mock_y_resolve):
         """First object moves when mass is less than second's."""
@@ -52,7 +52,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
 
     @patch(collision_2d_module + '.resolve_game_object_y_collision')
     @patch(collision_2d_module + '.resolve_game_object_x_collision')
-    @patch(collision_2d_module + '.detect_overlap_2d')
+    @patch('engine.geometry.detect_overlap_2d')
     def test_first_has_equal_mass(self, mock_2d_detect, mock_x_resolve,
                                   mock_y_resolve):
         """First object moves when mass is equal to second's."""
@@ -75,7 +75,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
 
     @patch(collision_2d_module + '.resolve_game_object_y_collision')
     @patch(collision_2d_module + '.resolve_game_object_x_collision')
-    @patch(collision_2d_module + '.detect_overlap_2d')
+    @patch('engine.geometry.detect_overlap_2d')
     def test_first_is_heavier(self, mock_2d_detect, mock_x_resolve,
                               mock_y_resolve):
         """Second object moves when mass is less than first's."""
@@ -97,7 +97,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
         second.set_position.assert_not_called()
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_velocity_is_reset_along_x(self, mock_1d_detect, mock_1d_resolve):
         """X velocity is cancelled when moved along x axis."""
         moving = Mock(
@@ -142,7 +142,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
             "Resting accelerations should not have been reset")
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_velocity_is_reset_along_y(self, mock_1d_detect, mock_1d_resolve):
         """Y velocity is cancelled when moved along y axis."""
         moving = Mock(
@@ -187,7 +187,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
             "Resting accelerations should not have been reset")
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_resolve_x_axis_no_overlap(self, mock_1d_detect, mock_1d_resolve):
         """Resolving x axis does nothing if no overlap exists."""
         moving = Mock(x=1, y=2, width=3, height=4,
@@ -210,7 +210,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
             (resting.x, resting.y, resting.width, resting.height))
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_object_is_moved_along_x(self, mock_1d_detect, mock_1d_resolve):
         """X coordinate is changed when moved along x axis."""
         moving = Mock(x=1, y=2, width=3, height=4,
@@ -235,7 +235,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
             (resting.x, resting.y, resting.width, resting.height))
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_resolve_y_axis_no_overlap(self, mock_1d_detect, mock_1d_resolve):
         """Resolving y axis does nothing if no overlap exists."""
         moving = Mock(x=1, y=2, width=3, height=4)
@@ -257,7 +257,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
             (resting.x, resting.y, resting.width, resting.height))
 
     @patch(collision_2d_module + '.get_nonoverlapping_coordinate_1d')
-    @patch(collision_2d_module + '.detect_overlap_1d')
+    @patch('engine.geometry.detect_overlap_1d')
     def test_object_is_moved_along_y(self, mock_1d_detect, mock_1d_resolve):
         """Y coordinate is changed when moved along y axis."""
         moving = Mock(x=1, y=2, width=3, height=4,

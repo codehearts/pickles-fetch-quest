@@ -22,7 +22,7 @@ class EventDispatcher(pyglet.event.EventDispatcher):
         is registered.
 
         Args:
-            name (:obj:`str`): The name of the event to register.
+            name (str): The name of the event to register.
         """
         EventDispatcher.register_event_type(name)
 
@@ -32,7 +32,7 @@ class EventDispatcher(pyglet.event.EventDispatcher):
         Args:
             *args (list of callable): A list of callable objects to attach.
                 The `__name__` attribute is used as the event name.
-            **kwargs (dict of :obj:`str`: callable): A mapping of event names
+            **kwargs (dict of str: callable): A mapping of event names
                 to callable objects to attach.
         """
         try:
@@ -48,7 +48,7 @@ class EventDispatcher(pyglet.event.EventDispatcher):
         application.
 
         Args:
-            name (:obj:`str`): The name of the event to dispatch.
+            name (str): The name of the event to dispatch.
                 All callables registered for this event with
                 :fn:`add_listeners` will be called.
             *args: Arguments to pass to the event listeners.
