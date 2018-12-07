@@ -16,8 +16,8 @@ class CollisionResolverEntry(object):
     """An entry within a collision resolver object.
 
     Attributes:
-        geometry (:obj:`object`): The geometry object registered with the
-                                  collision resolver.
+        geometry (:obj:`engine.geometry.Rectangle`):
+            The geometry object registered with the collision resolver.
         method (int): The method for collision resolution. One of
                       ``CollisionResolverEntry.DETECT_COLLISIONS`` or
                       ``CollisionResolverEntry.RESOLVE_COLLISIONS``.
@@ -27,8 +27,8 @@ class CollisionResolverEntry(object):
         """Creates a new collision resolver entry.
 
         Args:
-            geometry (:obj:`object`): The geometry object registered with the
-                                      collision resolver.
+            geometry (:obj:`engine.geometry.Rectangle`):
+                The geometry object registered with the collision resolver.
             method (int): The method for collision resolution. One of
                           ``CollisionResolverEntry.DETECT_COLLISIONS`` or
                           ``CollisionResolverEntry.RESOLVE_COLLISIONS``.

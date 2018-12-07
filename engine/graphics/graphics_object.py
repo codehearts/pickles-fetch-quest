@@ -14,15 +14,17 @@ class GraphicsObject(object):
     GraphicsObjects support batches and groups for efficient rendering.
 
     Attributes:
-        coordinates (:obj:`Point2d`): Coordinates of the bottom left corner.
+        coordinates (:obj:`engine.geometry.Point2d`):
+            Coordinates of the bottom left corner.
     """
 
     def __init__(self, coordinates, display_states, batch=None, group=None):
         """Creates an on-screen graphic supporting multiple display states.
 
         Args:
-            coordinates (:obj:`Point2d`): Coordinates of the bottom left edge.
-            display_states (dict of :obj:`str`: :obj:`pyglet.image.Texture`):
+            coordinates (:obj:`engine.geometry.Point2d`):
+                Coordinates of the bottom left edge.
+            display_states (dict of str to :obj:`pyglet.image.Texture`):
                 A mapping of state names to image objects. The 'default' state
                 is required or a ``KeyError`` is raised.
 

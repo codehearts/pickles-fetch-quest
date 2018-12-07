@@ -1,15 +1,15 @@
-from ..util.math import divide_toward_zero
-from ..geometry import Point2d
+from engine.util.math import divide_toward_zero
+from engine import geometry
 
 
 class Physics2d(object):
     """Simple two dimensional physics simulation.
 
     Attributes:
-        velocity (:obj:`geometry.Point2d`): Velocity along the x and y axes
-            in units per second.
-        acceleration (:obj:`geometry.Point2d`): Acceleration along the x and y
-            axes in units per second.
+        velocity (:obj:`engine.geometry.Point2d`):
+            Velocity along the x and y axes in units per second.
+        acceleration (:obj:`engine.geometry.Point2d`):
+            Acceleration along the x and y axes in units per second.
         friction (int): Coefficient of friction between 1 and 100 when no
             acceleration is applied, to slow the object to rest.
     """
@@ -28,11 +28,11 @@ class Physics2d(object):
                 the x and y axes in units per second. Defaults to (100, 100).
         """
         super(Physics2d, self).__init__()
-        self.velocity = Point2d(0, 0)
-        self.acceleration = Point2d(0, 0)
+        self.velocity = geometry.Point2d(0, 0)
+        self.acceleration = geometry.Point2d(0, 0)
         self.friction = max(min(100, friction), 1)  # Clamp between 1 and 100
-        self._terminal_velocity = Point2d(*terminal_velocity)
-        self._gravity = Point2d(*gravity)
+        self._terminal_velocity = geometry.Point2d(*terminal_velocity)
+        self._gravity = geometry.Point2d(*gravity)
         self.mass = mass
 
         # Higher resolution copies for simulation

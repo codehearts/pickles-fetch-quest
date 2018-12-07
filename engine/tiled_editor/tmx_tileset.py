@@ -1,6 +1,6 @@
-from ..util.indices_1d import flip_1d_index_vertically
-from engine import disk
+from engine.util.indices_1d import flip_1d_index_vertically
 from os.path import dirname, join, normpath
+from engine import disk
 
 
 def load_tmx_tileset(tmx_path, tileset_node):
@@ -17,7 +17,7 @@ def load_tmx_tileset(tmx_path, tileset_node):
     Yields:
         A tuple of (tileset_index, graphic) for each tile, where the index is
         an int and the graphic can be used to construct a
-        :obj:`GraphicsObject`.
+        :obj:`engine.graphics.GraphicsObject`.
     """
     # Get the image node for this tileset
     image_node = tileset_node.find('image')

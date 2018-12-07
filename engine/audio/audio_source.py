@@ -18,7 +18,7 @@ class AudioSource(object):
             will remain nominal within this distance, and approach zero as it
             moves further away beyond this distance.
         position (tuple of int): The position of the audo source in
-            two-dimensional space. :obj:`audio.AudioDirector` uses this
+            two-dimensional space. :obj:`engine.audio.AudioDirector` uses this
             property to determine the volume of audio based on its distance
             from the listener.
         looping (bool): Whether the audio source loops its playback.

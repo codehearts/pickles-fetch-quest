@@ -1,8 +1,8 @@
 from ..event_dispatcher import EventDispatcher
-from ..geometry import Point2d, Rectangle
+from engine import geometry
 
 
-class GameObject(Rectangle, EventDispatcher):
+class GameObject(geometry.Rectangle, EventDispatcher):
     """Game object with support for event dispatching.
 
     See :cls:`event_dispatcher.EventDispatcher` for usage information on the
@@ -11,11 +11,13 @@ class GameObject(Rectangle, EventDispatcher):
     Attributes:
         x (int): The x coordinate of the left edge of the object's geometry.
         y (int): The y coordinate of the bottom edge of the object's geometry.
-        coordinates (:obj:`Point2d`): The coordinates for the bottom left edge
-                                      of the object's geometry. Read-only.
+        coordinates (:obj:`engine.geometry.Point2d`):
+            The coordinates for the bottom left edge of the object's geometry.
+            Read-only.
         width (int): The width of the object's geometry.
         height (int): The height of the object's geometry.
-        physics (:obj:`Physics2d`): Physics that the object obeys on update.
+        physics (:obj:`engine.geometry.Physics2d`):
+            Physics that the object obeys on update.
 
     Events:
         on_move: The x or y coordinates of the object's geometry have changed.
@@ -28,20 +30,20 @@ class GameObject(Rectangle, EventDispatcher):
         """Creates a new event-driven game object.
 
         Args:
-            geometry_states (dict of :obj:`str`: :obj:`geometry.Rectangle`):
+            geometry_states (dict of str to :obj:`engine.geometry.Rectangle`):
                 A mapping of state names to geometry objects. The 'default'
                 state is required or a ``KeyError`` is raised.
 
                 A possible valid ``geometry_states`` value would be::
 
                     {
-                        'default': Rectangle(0, 0, 32, 32),
-                        'active': Rectangle(10, 10, 64, 128)
+                        'default': geometry.Rectangle(0, 0, 32, 32),
+                        'active': geometry.Rectangle(10, 10, 64, 128)
                     }
             x (int): The x coordinate for the game object's bottom edge.
             y (int): The y coordinate for the game object's left edge.
-            physics (:obj:`physics.Physics2d`): Physics for the object to obey
-                when its `update` method is called.
+            physics (:obj:`engine.physics.Physics2d`):
+                Physics for the object when its `update` method is called.
 
         Raises:
             KeyError: If ``geometry_states`` was missing the 'default' state.
@@ -71,7 +73,8 @@ class GameObject(Rectangle, EventDispatcher):
         """Dispatches an ``on_collision`` event with the other object.
 
         Args:
-            other (:obj:`GameObject`): The object this one overlapped with.
+            other (:obj:`engine.game_object.GameObject`):
+                The object this one overlapped with.
         """
         self.dispatch_event('on_collision', other)
 
@@ -102,7 +105,7 @@ class GameObject(Rectangle, EventDispatcher):
 
         This property is read-only. Use ``set_position`` to set it.
         """
-        return Point2d(self._coordinates.x, self._coordinates.y)
+        return geometry.Point2d(self._coordinates.x, self._coordinates.y)
 
     @property
     def x(self):

@@ -7,7 +7,8 @@ class Rectangle(object):
     Attributes:
         x (int): The x coordinate of the left edge of the rectangle.
         y (int): The y coordinate of the bottom edge of the rectangle.
-        coordinates (:obj:`Point2d`): The coordinates as a :obj:`Point2d`.
+        coordinates (:obj:`engine.geometry.Point2d`):
+            The coordinates as a :obj:`Point2d`.
         width (int): The width of the rectangle.
         height (int): The height of the rectangle.
     """

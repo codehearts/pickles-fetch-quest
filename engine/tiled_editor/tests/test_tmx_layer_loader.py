@@ -10,7 +10,7 @@ class TestTmxLayer(unittest.TestCase):
 
     @patch('engine.tiled_editor.tmx_layer_loader.load_tmx_tile_layer')
     @patch('engine.graphics.GraphicsObject')
-    @patch('engine.tiled_editor.tmx_layer_loader.RoomLayer')
+    @patch('engine.room.RoomLayer')
     def test_graphics_are_created_for_tile_layers(self, MockLayer,
                                                   MockGraphics,
                                                   mock_load_tile_layer):
@@ -55,7 +55,7 @@ class TestTmxLayer(unittest.TestCase):
 
     @patch('engine.tiled_editor.tmx_layer_loader.load_tmx_object_layer')
     @patch('engine.graphics.GraphicsObject')
-    @patch('engine.tiled_editor.tmx_layer_loader.RoomLayer')
+    @patch('engine.room.RoomLayer')
     def test_graphics_are_created_for_obj_layers(self, MockLayer, MockGraphics,
                                                  mock_load_object_layer):
         """Objects are created when loading object layers."""

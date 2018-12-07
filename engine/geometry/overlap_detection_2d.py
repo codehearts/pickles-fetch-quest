@@ -5,8 +5,8 @@ def detect_overlap_2d(first, second):
     """Detects overlap between two rectangles in two dimensional space.
 
     Args:
-        first (:obj:`Rectangle`): The first rectangle.
-        second (:obj:`Rectangle`): The second rectangle.
+        first (:obj:`engine.geometry.Rectangle`): The first rectangle.
+        second (:obj:`engine.geometry.Rectangle`): The second rectangle.
 
     Returns:
         True if the rectangles overlap, False otherwise.

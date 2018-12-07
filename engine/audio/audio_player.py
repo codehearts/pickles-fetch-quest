@@ -1,16 +1,16 @@
-from ..event_dispatcher import EventDispatcher
+from engine import event_dispatcher
 import pyglet.media
 
 
-class AudioPlayer(EventDispatcher):
+class AudioPlayer(event_dispatcher.EventDispatcher):
     """Playback control for an audio source.
 
-    See :cls:`event_dispatcher.EventDispatcher` for usage information on the
-    event dispatcher.
+    See :cls:`engine.event_dispatcher.EventDispatcher` for usage information on
+    the event dispatcher.
 
     Attributes:
         position (tuple of int): The position of the audio source in
-            two-dimensional space. :obj:`audio.AudioDirector` uses this
+            two-dimensional space. :obj:`engine.audio.AudioDirector` uses this
             property to determine the volume of audio based on its distance
             from the listener.
         looping (bool): Whether the audio source loops its playback.
