@@ -48,7 +48,7 @@ class TestAudioDirector(unittest.TestCase):
             0.5, mock_listener.volume, 'Listener volume not set')
 
     @patch('engine.audio.audio_director.AudioSource')
-    @patch('engine.audio.audio_director.DiskLoader')
+    @patch('engine.disk.DiskLoader')
     def test_load_creates_audio_source_from_disk(self, MockLoader, MockSource):
         """Audio files are read from disk on initial load."""
         stream_mock = Mock()
@@ -68,7 +68,7 @@ class TestAudioDirector(unittest.TestCase):
             'Loaded audio source was not returned from disk')
 
     @patch('engine.audio.audio_director.AudioSource')
-    @patch('engine.audio.audio_director.DiskLoader')
+    @patch('engine.disk.DiskLoader')
     def test_load_caches_audio_sources_from_disk(self, MockLoader, MockSource):
         """Audio files are returned from cache on subsequent loads."""
         loaded_source = self.director.load('audio.wav')
@@ -89,7 +89,7 @@ class TestAudioDirector(unittest.TestCase):
             'Loaded audio source was not returned from cache')
 
     @patch('engine.audio.audio_director.AudioSource')
-    @patch('engine.audio.audio_director.DiskLoader')
+    @patch('engine.disk.DiskLoader')
     def test_load_adds_audio_source_to_all_group(self, MockLoader, MockSource):
         """Audio files are added to the 'all' group when loaded."""
         self.director.load('audio.wav')
@@ -99,7 +99,7 @@ class TestAudioDirector(unittest.TestCase):
         MockSource.return_value.play.assert_called_once()
 
     @patch('engine.audio.audio_director.AudioSource')
-    @patch('engine.audio.audio_director.DiskLoader')
+    @patch('engine.disk.DiskLoader')
     def test_load_sets_attenuation_distance(self, MockLoader, MockSource):
         """Audio files have their attenuation distance set when loaded."""
         self.director.attenuation_distance = 1234

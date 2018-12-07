@@ -1,5 +1,5 @@
 from ..util.indices_1d import flip_1d_index_vertically
-from ..disk_loader import DiskLoader
+from engine import disk
 from os.path import dirname, join, normpath
 
 
@@ -7,8 +7,8 @@ def load_tmx_tileset(tmx_path, tileset_node):
     """Yields a tuple of (tileset_index, graphic) for each tile in a tileset.
 
     Args:
-        tmx_path (str): Path to the TMX file, relative to the :obj:`DiskLoader`
-            resource path.
+        tmx_path (str): Path to the TMX file, relative to the
+            :obj:`engine.disk.DiskLoader` resource path.
         tileset_node (:obj:`xml.etree.Element`): Tileset element to load.
 
     Raises:
@@ -35,7 +35,7 @@ def load_tmx_tileset(tmx_path, tileset_node):
     rows = tile_count // columns
 
     # Load the image source into an image grid
-    image_grid = DiskLoader.load_image_grid(image_path, rows, columns)
+    image_grid = disk.DiskLoader.load_image_grid(image_path, rows, columns)
 
     # Add each tile from this image source to the tile map
     for i in range(0, tile_count):

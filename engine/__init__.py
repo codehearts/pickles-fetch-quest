@@ -1,5 +1,4 @@
 from .audio import AudioDirector
-from .disk_loader import DiskLoader
 from .factory import GenericFactory
 from .geometry import Point2d, Rectangle
 from .key_handler import KeyHandler
@@ -12,7 +11,6 @@ __all__ = [
     'AudioDirector',
     'CollisionResolver2d',
     'DETECT_COLLISIONS',
-    'DiskLoader',
     'GenericFactory',
     'KeyHandler',
     'Point2d',

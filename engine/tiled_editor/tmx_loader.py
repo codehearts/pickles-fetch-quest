@@ -2,7 +2,7 @@ from distutils.version import StrictVersion
 from .tmx_layer_loader import TmxLayerLoader
 from .tmx_tileset import load_tmx_tileset
 from ..room import RoomLayerCollection
-from ..disk_loader import DiskLoader
+from engine import disk
 
 
 class TmxLoader(object):
@@ -17,14 +17,14 @@ class TmxLoader(object):
 
         Args:
             tmx_path (str): Path to the TMX file, relative to the
-                :obj:`DiskLoader` resource path.
+                :obj:`engine.disk.DiskLoader` resource path.
             object_factory (:obj:`GenericFactory`): An object factory to
                 convert TMX object names into Python objects.
         """
         super(TmxLoader, self).__init__()
 
         # Get the root map node from the TMX file
-        self._map_node = DiskLoader.load_xml(tmx_path)
+        self._map_node = disk.DiskLoader.load_xml(tmx_path)
         map_attr = self._map_node.attrib
 
         if StrictVersion(map_attr['version']) < StrictVersion('1.2'):
