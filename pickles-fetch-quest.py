@@ -1,17 +1,16 @@
-from engine import AudioDirector, CollisionResolver2d, DiskLoader
-from engine import GenericFactory, GraphicsController, GraphicsObject
-from engine import KeyHandler, Physics2d, Point2d, Rectangle
-from engine import RESOLVE_COLLISIONS, Room, Tile, TmxLoader
+from engine import audio, collision, disk, factory, geometry, graphics
+from engine import game_object, key_handler, physics, room, tiled_editor
 from pyglet.window import key
 import pyglet.app
 import pyglet.gl
 
-DiskLoader.set_resource_paths(['resources/'])
+disk.DiskLoader.set_resource_paths(['resources/'])
 
-audio_director = AudioDirector(master_volume=0.99)
-pickle_graphics = GraphicsController(160, 140, title="Pickle's Fetch Quest")
-key_handler = KeyHandler(pickle_graphics)
-collision_resolver = CollisionResolver2d(2)
+audio_director = audio.AudioDirector(master_volume=0.99)
+pickle_graphics = graphics.GraphicsController(
+    160, 140, title="Pickle's Fetch Quest")
+key_handler = key_handler.KeyHandler(pickle_graphics)
+collision_resolver = collision.CollisionResolver2d(2)
 
 audio_director.attenuation_distance = 40
 
@@ -20,8 +19,8 @@ collision_sound = audio_director.load(
 
 
 def create_physics_tile(x, y, states, *args, **kwargs):
-    physics = Physics2d(*args, **kwargs)
-    tile = Tile(states, x=x, y=y, physics=physics)
+    physics_object = physics.Physics2d(*args, **kwargs)
+    tile = game_object.GameObject(states, x, y, physics_object)
 
     def play_collision_audio(other):
         instance = collision_sound.play()
@@ -29,7 +28,7 @@ def create_physics_tile(x, y, states, *args, **kwargs):
 
     tile.add_listeners(on_collision=play_collision_audio)
     pickle_graphics.add_listeners(on_update=tile.update)
-    collision_resolver.register(tile, RESOLVE_COLLISIONS)
+    collision_resolver.register(tile, collision.RESOLVE_COLLISIONS)
 
     return tile
 
@@ -37,9 +36,9 @@ def create_physics_tile(x, y, states, *args, **kwargs):
 def create_floor_physics(**kwargs):
     x, y, width, height = (kwargs[k] for k in ('x', 'y', 'width', 'height'))
 
-    physics = Physics2d(mass=9999, gravity=(0, 0))
-    floor_states = {'default': Rectangle(x, y, width, height)}
-    tile = Tile(floor_states, x=x, y=y, physics=physics)
+    physics_object = physics.Physics2d(mass=9999, gravity=(0, 0))
+    floor_states = {'default': geometry.Rectangle(x, y, width, height)}
+    tile = game_object.GameObject(floor_states, x, y, physics_object)
 
     def play_collision_audio(other):
         collision_sound.play()
@@ -47,16 +46,17 @@ def create_floor_physics(**kwargs):
 
     tile.add_listeners(on_collision=play_collision_audio)
     pickle_graphics.add_listeners(on_update=tile.update)
-    collision_resolver.register(tile, RESOLVE_COLLISIONS)
+    collision_resolver.register(tile, collision.RESOLVE_COLLISIONS)
 
     return tile
 
 
-pickle_frames = DiskLoader.load_image_grid('tiles/pickle.png', 1, 2)
-pickle_graphic = GraphicsObject(Point2d(0, 0), {
-    'default': GraphicsObject.create_animation(pickle_frames, 1, loop=True)})
+pickle_frames = disk.DiskLoader.load_image_grid('tiles/pickle.png', 1, 2)
+pickle_graphic = graphics.GraphicsObject(geometry.Point2d(0, 0), {
+    'default':
+        graphics.GraphicsObject.create_animation(pickle_frames, 1, loop=True)})
 
-player_states = {'default': Rectangle(x=0, y=0, width=16, height=16)}
+player_states = {'default': geometry.Rectangle(x=0, y=0, width=16, height=16)}
 player = create_physics_tile(0, 0, player_states, friction=75,
                              gravity=(0, -15), terminal_velocity=(2, 100))
 
@@ -71,13 +71,13 @@ def position_pickle(**kwargs):
 
 
 # Create factory to convert TMX object names into game objects
-pickle_factory = GenericFactory()
-pickle_factory.add_recipe('pickle', position_pickle)
-pickle_factory.add_recipe('floor', create_floor_physics)
+tmx_factory = factory.GenericFactory()
+tmx_factory.add_recipe('pickle', position_pickle)
+tmx_factory.add_recipe('floor', create_floor_physics)
 
 # Load the entry room from the Tiled editor save file
-entry_room_loader = TmxLoader('rooms/entry-room.tmx', pickle_factory)
-entry_room = Room(entry_room_loader.layers)
+entry_room_loader = tiled_editor.TmxLoader('rooms/entry-room.tmx', tmx_factory)
+entry_room = room.Room(entry_room_loader.layers)
 
 
 def on_update(dt):
