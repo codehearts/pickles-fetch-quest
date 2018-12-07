@@ -2,7 +2,6 @@ from .audio import AudioDirector
 from .disk_loader import DiskLoader
 from .factory import GenericFactory
 from .geometry import Point2d, Rectangle
-from .game_objects import Tile
 from .key_handler import KeyHandler
 from .physics import Physics2d
 from .room import Room
@@ -21,5 +20,4 @@ __all__ = [
     'Rectangle',
     'RESOLVE_COLLISIONS',
     'Room',
-    'Tile',
 ]

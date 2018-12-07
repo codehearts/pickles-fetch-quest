@@ -1,3 +1,3 @@
-from .tile import Tile
+from .game_object import GameObject
 
-__all__ = ['Tile']
+__all__ = ['GameObject']
