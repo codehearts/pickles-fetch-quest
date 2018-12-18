@@ -17,8 +17,10 @@ class TestPlatformerController(unittest.TestCase):
         self.mock_character = Mock(y=0)
         self.walk_acceleration = 12
         self.jump_height = 34
+        self.jump_time = 250
         self.controller = PlatformerController(
-            self.mock_character, self.walk_acceleration, self.jump_height)
+            self.mock_character, self.walk_acceleration, self.jump_height,
+            self.jump_time)
 
     def test_controller_is_not_jumping_by_default(self):
         """By default, a controller is not jumping."""
@@ -30,7 +32,7 @@ class TestPlatformerController(unittest.TestCase):
         self.mock_character.physics.acceleration.y = 0
         self.mock_character.physics.velocity.y = 0
 
-        self.controller.jump()
+        self.controller.jump(15)
         self.assertTrue(self.controller.is_jumping)
 
     def test_controller_is_not_jumping_after_cancelling_jump(self):
@@ -39,45 +41,43 @@ class TestPlatformerController(unittest.TestCase):
         self.mock_character.physics.acceleration.y = 0
         self.mock_character.physics.velocity.y = 0
 
-        self.controller.jump()
+        self.controller.jump(15)
         self.controller.cancel_jump()
         self.assertFalse(self.controller.is_jumping)
 
-    def test_jump_acceleration_decreases_as_jump_is_called(self):
-        """The acceleration of a jump decreases the more `jump` is called."""
+    def test_jump_velocity_decreases_as_jump_is_called(self):
+        """The velocity of a jump decreases the more `jump` is called."""
         # Start from rest
         self.mock_character.physics.acceleration.y = 0
         self.mock_character.physics.velocity.y = 0
 
         impulses = []
 
-        # Jump and capture the acceleration multiple times
+        # Jump and capture the velocity multiple times
         for i in range(3):
-            self.controller.jump()
+            self.controller.jump(self.jump_time // 3)
             self.mock_character.y += 1
-            impulses.append(self.mock_character.physics.acceleration.y)
+            impulses.append(self.mock_character.physics.velocity.y)
 
         # Acceleration should decrease
         self.assertLess(impulses[-1], impulses[-2])
         self.assertLess(impulses[-2], impulses[-3])
 
-    def test_caps_height_during_jump(self):
-        """The max height of a jump is capped to the jump height."""
+    def test_impulse_is_removed_at_end_of_jump_time(self):
+        """The jump impulse is removed once the jump time has elapsed."""
         # Start from rest
         self.mock_character.physics.acceleration.y = 0
         self.mock_character.physics.velocity.y = 0
 
-        self.controller.jump()
+        self.controller.jump(0)
 
-        # Just below jump height, impulse should be applied
-        self.mock_character.y = self.jump_height - 1
-        self.controller.jump()
-        self.assertGreater(self.mock_character.physics.acceleration.y, 0)
+        # Just before the end of the jump, impulse should be applied
+        self.controller.jump(self.jump_time - 1)
+        self.assertGreater(self.mock_character.physics.velocity.y, 0)
 
         # At jump height, impulse should be removed
-        self.mock_character.y = self.jump_height
-        self.controller.jump()
-        self.assertEqual(0, self.mock_character.physics.acceleration.y)
+        self.controller.jump(1)
+        self.assertEqual(0, self.mock_character.physics.velocity.y)
 
     def test_controller_is_not_airborne_when_at_rest(self):
         """A controller is not airborne when the character is at rest."""
