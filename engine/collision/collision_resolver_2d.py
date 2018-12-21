@@ -7,22 +7,14 @@ class CollisionResolver2d(object):
     """Resolves collisions between registered two dimensional game objects.
 
     This is implemented as a sweep-and-prune algorithm.
-
-    Attributes:
-        movement_threshold (int): The minimum change in velocity during
-            collision resolution on an axis for a collision to be notified.
     """
 
-    def __init__(self, movement_threshold):
+    def __init__(self):
         """Creates a new two dimensional collision resolver.
-
-        Args:
-            movement_threshold (int): The minimum change in velocity during
-                collision resolution on an axis for a collision to be notified.
         """
         super(CollisionResolver2d, self).__init__()
-        self.movement_threshold = movement_threshold
         self._registered_entries = []
+        self._collision_cache = {}
 
     def register(self, game_object, method):
         """Registers a game object to be resolved using the given method.
@@ -43,7 +35,6 @@ class CollisionResolver2d(object):
 
     def resolve(self):
         """Detects and resolves collisions amongst registered game objects."""
-
         # Sort entries by the x coordinate of their geometry
         self._registered_entries.sort(key=lambda x: x.geometry.x)
 
@@ -74,12 +65,26 @@ class CollisionResolver2d(object):
             self._notify_collision(first.geometry, second.geometry)
         else:
             # If neither object is detection-only, resolve the collision
-            deltas = resolve_game_object_collision(
+            delta = resolve_game_object_collision(
                 first.geometry, second.geometry)
 
-            # Notify the collision if enough movement was detected on any axis
-            if any(delta >= self.movement_threshold for delta in deltas):
-                self._notify_collision(first.geometry, second.geometry)
+            # Look for delta from a prior collision between these objects
+            cache_delta = ()
+            if first in self._collision_cache:
+                if second in self._collision_cache[first]:
+                    cache_delta = self._collision_cache[first][second]
+
+            if delta != (0, 0):
+                # Is any index in `delta` > the same index in `cache_delta`?
+                delta_expanded = any(x > y for x, y in zip(delta, cache_delta))
+
+                if not cache_delta or delta_expanded:
+                    # Notify collision if displacement increased on any axis
+                    self._notify_collision(first.geometry, second.geometry)
+
+                # Cache the delta from this collision
+                self._collision_cache.setdefault(first, {})[second] = delta
+                self._collision_cache.setdefault(second, {})[first] = delta
 
         return first
 
