@@ -23,8 +23,6 @@ class CollisionResolver2d(object):
         super(CollisionResolver2d, self).__init__()
         self.movement_threshold = movement_threshold
         self._registered_entries = []
-        self._current_collisions = {}
-        self._i = 0
 
     def register(self, game_object, method):
         """Registers a game object to be resolved using the given method.
@@ -45,7 +43,6 @@ class CollisionResolver2d(object):
 
     def resolve(self):
         """Detects and resolves collisions amongst registered game objects."""
-        self._current_collisions.clear()
 
         # Sort entries by the x coordinate of their geometry
         self._registered_entries.sort(key=lambda x: x.geometry.x)
@@ -98,9 +95,6 @@ class CollisionResolver2d(object):
         # Only notify if these objects were not previously colliding
         first.notify_collision_with(second)
         second.notify_collision_with(first)
-
-        self._current_collisions.setdefault(first, []).append(second)
-        self._current_collisions.setdefault(second, []).append(first)
 
     def _is_swept_past(self, old_entry, new_entry):
         """Determines if the new entry has swept past the prior entry.
