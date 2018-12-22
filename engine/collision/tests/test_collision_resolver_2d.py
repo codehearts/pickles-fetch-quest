@@ -12,7 +12,7 @@ class TestCollisionResolver2d(unittest.TestCase):
 
     def setUp(self):
         """Creates a new :cls:`CollisionResolver2d` as ``self.resolver``."""
-        self.resolver = CollisionResolver2d(0)
+        self.resolver = CollisionResolver2d()
 
     @patch(resolve_game_object_collision_fn)
     def test_resolve_3_nonoverlapping_shapes(self, resolve_mock):
@@ -200,61 +200,44 @@ class TestCollisionResolver2d(unittest.TestCase):
         b.notify_collision_with.assert_has_calls([call(a)])
 
     @patch(resolve_game_object_collision_fn)
-    def test_does_not_notify_when_threshold_is_not_crossed(self, resolve_mock):
-        """No notifications when the movement threshold was not crossed."""
-        self.resolver = CollisionResolver2d(2)  # Movement threshold of 2
+    def test_does_not_notify_prior_collisions(self, resolve_mock):
+        """No notifications fire when the prior collision occurs again."""
+        self.resolver = CollisionResolver2d()
 
         a = Mock(name='a', x=1, width=2, y=3, height=2)
         b = Mock(name='b', x=2, width=2, y=2, height=2)
-        c = Mock(name='c', x=3, width=2, y=1, height=2)
         self.resolver.register(a, RESOLVE_COLLISIONS)
         self.resolver.register(b, RESOLVE_COLLISIONS)
-        self.resolver.register(c, RESOLVE_COLLISIONS)
 
-        # Neither axis has enough movement
+        # Objects are resolved by changing velocity
         resolve_mock.return_value = (1, 1)
+
+        self.resolver.resolve()
+        a.notify_collision_with.assert_called_once_with(b)
+        b.notify_collision_with.assert_called_once_with(a)
+
+        # Same resolution as before
+        resolve_mock.return_value = (1, 1)
+
+        self.resolver.resolve()
+
+        # Still only called once, meaning they weren't called a second time
+        a.notify_collision_with.assert_called_once_with(b)
+        b.notify_collision_with.assert_called_once_with(a)
+
+    @patch(resolve_game_object_collision_fn)
+    def test_does_not_notify_empty_deltas(self, resolve_mock):
+        """No notifications fire when resolution did not move an object."""
+        self.resolver = CollisionResolver2d()
+
+        a = Mock(name='a', x=1, width=2, y=3, height=2)
+        b = Mock(name='b', x=2, width=2, y=2, height=2)
+        self.resolver.register(a, RESOLVE_COLLISIONS)
+        self.resolver.register(b, RESOLVE_COLLISIONS)
+
+        # No movement occurred
+        resolve_mock.return_value = (0, 0)
 
         self.resolver.resolve()
         a.notify_collision_with.assert_not_called()
         b.notify_collision_with.assert_not_called()
-        c.notify_collision_with.assert_not_called()
-
-    @patch(resolve_game_object_collision_fn)
-    def test_notifies_when_x_threshold_is_crossed(self, resolve_mock):
-        """Notifies when the movement threshold was crossed on the x axis."""
-        self.resolver = CollisionResolver2d(2)  # Movement threshold of 2
-
-        a = Mock(name='a', x=1, width=2, y=3, height=2)
-        b = Mock(name='b', x=2, width=2, y=2, height=2)
-        c = Mock(name='c', x=3, width=2, y=1, height=2)
-        self.resolver.register(a, RESOLVE_COLLISIONS)
-        self.resolver.register(b, RESOLVE_COLLISIONS)
-        self.resolver.register(c, RESOLVE_COLLISIONS)
-
-        # X axis has enough movement
-        resolve_mock.return_value = (2, 1)
-
-        self.resolver.resolve()
-        a.notify_collision_with.assert_has_calls([call(b)])
-        b.notify_collision_with.assert_has_calls([call(a), call(c)])
-        c.notify_collision_with.assert_has_calls([call(b)])
-
-    @patch(resolve_game_object_collision_fn)
-    def test_notifies_when_y_threshold_is_crossed(self, resolve_mock):
-        """Notifies when the movement threshold was crossed on the y axis."""
-        self.resolver = CollisionResolver2d(2)  # Movement threshold of 2
-
-        a = Mock(name='a', x=1, width=2, y=3, height=2)
-        b = Mock(name='b', x=2, width=2, y=2, height=2)
-        c = Mock(name='c', x=3, width=2, y=1, height=2)
-        self.resolver.register(a, RESOLVE_COLLISIONS)
-        self.resolver.register(b, RESOLVE_COLLISIONS)
-        self.resolver.register(c, RESOLVE_COLLISIONS)
-
-        # Y axis has enough movement
-        resolve_mock.return_value = (1, 2)
-
-        self.resolver.resolve()
-        a.notify_collision_with.assert_has_calls([call(b)])
-        b.notify_collision_with.assert_has_calls([call(a), call(c)])
-        c.notify_collision_with.assert_has_calls([call(b)])
