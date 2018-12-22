@@ -64,29 +64,52 @@ class CollisionResolver2d(object):
             # If either object is detection-only, notify of the collision
             self._notify_collision(first.geometry, second.geometry)
         else:
-            # If neither object is detection-only, resolve the collision
-            delta = resolve_game_object_collision(
-                first.geometry, second.geometry)
-
-            # Look for delta from a prior collision between these objects
-            cache_delta = ()
-            if first in self._collision_cache:
-                if second in self._collision_cache[first]:
-                    cache_delta = self._collision_cache[first][second]
-
-            if delta != (0, 0):
-                # Is any index in `delta` > the same index in `cache_delta`?
-                delta_expanded = any(x > y for x, y in zip(delta, cache_delta))
-
-                if not cache_delta or delta_expanded:
-                    # Notify collision if displacement increased on any axis
-                    self._notify_collision(first.geometry, second.geometry)
-
-                # Cache the delta from this collision
-                self._collision_cache.setdefault(first, {})[second] = delta
-                self._collision_cache.setdefault(second, {})[first] = delta
+            self._resolve_collision(first.geometry, second.geometry)
 
         return first
+
+    def _resolve_collision(self, first, second):
+        """Resolve a collision between two objects, notifying new collisions.
+
+        Args:
+            first (:obj:`engine.game_object.GameObject`):
+                The first object in the collision.
+            second (:obj:`engine.game_object.GameObject`):
+                The second object in the collision.
+        """
+        # If neither object is detection-only, resolve the collision
+        delta = resolve_game_object_collision(first, second)
+
+        if delta != (0, 0):
+            # Look for the delta from a prior collision between these objects
+            cache = self._get_cached_delta(first, second)
+
+            # Notify collision if displacement increased on any axis
+            if (not cache) or (delta[0] > cache[0]) or (delta[1] > cache[1]):
+                self._notify_collision(first, second)
+
+            # Cache the delta from this collision
+            self._collision_cache.setdefault(first, {})[second] = delta
+            self._collision_cache.setdefault(second, {})[first] = delta
+
+    def _get_cached_delta(self, first, second):
+        """Returns the cached delta for a collision between two objects.
+
+        Args:
+            first (:obj:`engine.game_object.GameObject`):
+                The first object in a collision.
+            second (:obj:`engine.game_object.GameObject`):
+                The second object in a collision.
+
+        Returns:
+            Tuple of int if the collision was cached, otherwise an empty tuple.
+        """
+        # Check if this collision is cached
+        is_cached = first in self._collision_cache and \
+            second in self._collision_cache[first]
+
+        # Look for the delta from a prior collision between these objects
+        return self._collision_cache[first][second] if is_cached else ()
 
     def _notify_collision(self, first, second):
         """Notifies collision if the objects weren't already colliding.
