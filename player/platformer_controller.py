@@ -24,15 +24,17 @@ class PlatformerController(object):
         self._jump_height = jump_height
         self._jump_time = jump_time
         self._elapsed_jump_time = 0
-        self._last_ground_position = self._character.y
 
         # Whether the character is intentionally jumping, not just airborne
         self._is_jumping = False
 
+        # Whether the character is on the ground
+        self._is_grounded = False
+
     @property
     def is_airborne(self):
         """Determines whether the character is airborne."""
-        return self._character.physics.velocity.y != 0 or self._is_jumping
+        return self._character.physics.velocity.y != 0 or not self._is_grounded
 
     @property
     def is_jumping(self):
@@ -50,11 +52,11 @@ class PlatformerController(object):
         """
         if not self.is_airborne:
             # Not airborne, start jumping and track where the jump is from
-            self._last_ground_position = self._character.y
             self._elapsed_jump_time = 0
+            self._is_grounded = False
             self._is_jumping = True
 
-        if self._elapsed_jump_time < self._jump_time:
+        if self._elapsed_jump_time < self._jump_time and self._is_jumping:
             # In the middle of a jump, calculate dampening and update velocity
             time_remaining = self._jump_time - self._elapsed_jump_time
 
@@ -94,3 +96,10 @@ class PlatformerController(object):
         Recommended as a key release handler.
         """
         self._character.physics.acceleration.x = 0
+
+    def process_collision(self, other):
+        # Check if the character was resolved on top of the other object
+        if self._character.y >= other.y + other.height - 1:
+            # After landing on ground, character is grounded and not jumping
+            self._is_grounded = True
+            self._is_jumping = False
