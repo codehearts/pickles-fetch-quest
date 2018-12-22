@@ -1,3 +1,3 @@
-from .platformer_controller import PlatformerController
+from .create import create_player
 
-__all__ = ['PlatformerController']
+__all__ = ['create_player']
