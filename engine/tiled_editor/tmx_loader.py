@@ -38,7 +38,10 @@ class TmxLoader(object):
         if map_attr['infinite'] != '0':
             raise NotImplementedError('Infinite maps are not supported')
 
-        self.layers = room.RoomLayerCollection()
+        width = int(map_attr['width']) * int(map_attr['tilewidth'])
+        height = int(map_attr['height']) * int(map_attr['tileheight'])
+
+        self.layers = room.RoomLayerCollection(width, height)
 
         self._object_factory = object_factory
         self._path = tmx_path

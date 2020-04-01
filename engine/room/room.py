@@ -27,3 +27,13 @@ class Room(object):
     def draw(self):
         """Draws all layers in the room."""
         self.layers.draw()
+
+    @property
+    def width(self):
+        """Returns the pixel width of the room."""
+        return self.layers.width
+
+    @property
+    def height(self):
+        """Returns the pixel height of the room."""
+        return self.layers.height

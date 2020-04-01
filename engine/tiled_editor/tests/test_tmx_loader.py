@@ -47,8 +47,8 @@ class TestTmxLoader(unittest.TestCase):
     def test_tile_layers_use_tilesets(self, MockDiskLoader, MockLayerLoader,
                                       mock_load_tileset):
         """Tile layers are loaded using the loaded tilesets."""
-        mock_xml = '<map version="1.2" orientation="orthogonal" '
-        mock_xml += 'infinite="0">\n'
+        mock_xml = '<map version="1.2" orientation="orthogonal" infinite="0" '
+        mock_xml += 'tilewidth="10" tileheight="10" width="1" height="2">\n'
         mock_xml += '\t<tileset/>\n'
         mock_xml += '\t<layer/>\n'
         mock_xml += '</map>\n'
@@ -87,8 +87,8 @@ class TestTmxLoader(unittest.TestCase):
     @patch('engine.disk.DiskLoader')
     def test_object_layers_are_loaded(self, MockDiskLoader, MockLayerLoader):
         """Tile layers are loaded using the loaded tilesets."""
-        mock_xml = '<map version="1.2" orientation="orthogonal" '
-        mock_xml += 'infinite="0">\n'
+        mock_xml = '<map version="1.2" orientation="orthogonal" infinite="0" '
+        mock_xml += 'tilewidth="10" tileheight="10" width="1" height="2">\n'
         mock_xml += '\t<objectgroup/>\n'
         mock_xml += '</map>\n'
         mock_root_node = ElementTree.parse(StringIO(mock_xml)).getroot()
@@ -112,3 +112,26 @@ class TestTmxLoader(unittest.TestCase):
         # Loaded layer was added to the collection
         self.assertEqual(
             MockLayerLoader().layer, tmx_loader.layers.get_layer('test'))
+
+    @patch('engine.tiled_editor.tmx_loader.load_tmx_tileset')
+    @patch('engine.tiled_editor.tmx_loader.TmxLayerLoader')
+    @patch('engine.disk.DiskLoader')
+    def test_layer_collection_has_map_dimensions(self, MockDiskLoader,
+                                                 MockLayerLoader,
+                                                 mock_load_tileset):
+        """Tile layer collection has the pixel dimensions of the map."""
+        mock_xml = '<map version="1.2" orientation="orthogonal" infinite="0" '
+        mock_xml += 'tilewidth="10" tileheight="10" width="1" height="2">\n'
+        mock_xml += '\t<tileset/>\n'
+        mock_xml += '\t<layer/>\n'
+        mock_xml += '</map>\n'
+        mock_root_node = ElementTree.parse(StringIO(mock_xml)).getroot()
+
+        MockDiskLoader.load_xml.return_value = mock_root_node
+
+        # Create a TMX loader with no object factory
+        tmx_loader = TmxLoader('map.tmx', None)
+
+        # Layer collection has pixel dimensions of the map
+        self.assertEqual(10, tmx_loader.layers.width)
+        self.assertEqual(20, tmx_loader.layers.height)

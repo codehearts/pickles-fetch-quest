@@ -4,10 +4,18 @@ from collections import OrderedDict
 class RoomLayerCollection(object):
     """Collection of multiple layers for a room."""
 
-    def __init__(self):
+    def __init__(self, width, height):
+        """Creates a new collection of ordered room layers.
+
+        Args:
+            width (int): The width of the collection in pixels.
+            height (int): The height of the collection in pixels.
+        """
         super(RoomLayerCollection, self).__init__()
 
         self._layers = OrderedDict()
+        self._width = width
+        self._height = height
 
     def add_layer(self, name, layer):
         """Adds a layer to the end of the collection, rendering it on top.
@@ -48,3 +56,13 @@ class RoomLayerCollection(object):
         """
         for name, layer in self._layers.items():
             layer.draw()
+
+    @property
+    def width(self):
+        """Returns the pixel width of the collection."""
+        return self._width
+
+    @property
+    def height(self):
+        """Returns the pixel height of the collection."""
+        return self._height
