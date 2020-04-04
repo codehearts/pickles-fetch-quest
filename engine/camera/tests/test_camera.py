@@ -6,6 +6,12 @@ import unittest
 class TestCamera(unittest.TestCase):
     """Test tracking functionality of the camera."""
 
+    def test_scale_defaults_to_1(self):
+        """The camera scale is 1 by default."""
+        camera = Camera(100, 50)
+
+        self.assertEqual(1, camera.scale)
+
     def test_look_at_centers_on_coordinates(self):
         """The camera target is centered within the frame."""
         camera = Camera(100, 50)
@@ -48,6 +54,15 @@ class TestCamera(unittest.TestCase):
         camera.attach()
 
         mock_translate.assert_called_once_with(-50, -25, 0)
+
+    @patch('pyglet.gl.glScalef')
+    def test_attach_scales_gl_context(self, mock_scale):
+        """Attaching the camera scales the OpenGL context."""
+        camera = Camera(100, 50)
+        camera.scale = 2
+        camera.attach()
+
+        mock_scale.assert_called_once_with(camera.scale, camera.scale, 0)
 
     @patch('pyglet.gl.glPopMatrix')
     def test_detach_pops_matrix(self, mock_pop_matrix):

@@ -7,6 +7,7 @@ class Camera(object):
     Attributes:
         x (int): The x coordinate of the camera's lower left corner.
         y (int): The y coordinate of the camera's lower left corner.
+        scale (float): The scaling to apply to the visible scene.
     """
 
     def __init__(self, width, height):
@@ -18,6 +19,7 @@ class Camera(object):
         """
         self._width = width
         self._height = height
+        self.scale = 1
 
         self._x = 0
         self._y = 0
@@ -69,6 +71,7 @@ class Camera(object):
         Calling :fn:`camera.Camera.detach` stops applying the transformations.
         """
         gl.glPushMatrix()
+        gl.glScalef(self.scale, self.scale, 0)
         gl.glTranslatef(-self._x, -self._y, 0)
 
     def detach(self):
