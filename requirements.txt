@@ -1,2 +1,2 @@
 defusedxml==0.6.0
-pyglet==1.5.4
+pyglet==1.5.5
