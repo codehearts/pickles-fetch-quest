@@ -1,4 +1,5 @@
 from ..camera import Camera
+from ...geometry import Point2d
 from unittest.mock import Mock, patch
 import unittest
 
@@ -23,7 +24,7 @@ class TestCamera(unittest.TestCase):
     def test_update_centers_on_followed_object(self):
         """Updating the camera centers it on the followed object."""
         # Create an object in the center of the camera
-        target = Mock(x=40, width=20, y=20, height=10)
+        target = Mock(width=20, height=10, center=Point2d(50, 25))
         camera = Camera(100, 50)
         camera.follow = target
         camera.update(123)
@@ -31,13 +32,41 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(0, camera.x, 'Not horizontally centered on target')
         self.assertEqual(0, camera.y, 'Not vertically centered on target')
 
-        # Move the object to be centered at (75, 40)
-        target.x = 65
-        target.y = 30
+        # Move the object to be centered at (75, 35)
+        target.center=Point2d(75, 35)
         camera.update(123)
 
         self.assertEqual(25, camera.x, 'Not horizontally centered after follow')
         self.assertEqual(10, camera.y, 'Not vertically centered after follow')
+
+    def test_update_centers_on_followed_object_with_easing(self):
+        """Updating the camera eases to the center of the followed object."""
+        # Create an object in the center of the camera
+        target = Mock(width=20, height=10, center=Point2d(50, 25),
+                    physics=Mock(velocity=Point2d(0, 0)))
+        camera = Camera(100, 50)
+        camera.follow = target
+        camera.follow_easing = Mock(value=Point2d(50, 25))
+        camera.update(123)
+
+        self.assertEqual(0, camera.x, 'Not horizontally centered on target with easing')
+        self.assertEqual(0, camera.y, 'Not vertically centered on target with easing')
+
+        # Easing was updated to view the center of the target
+        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+        camera.follow_easing.update.assert_called_once_with(123)
+
+        # Move the object to be centered at (75, 35)
+        camera.follow_easing.value = Point2d(55, 30)
+        target.center = Point2d(75, 35)
+        camera.update(456)
+
+        self.assertEqual(5, camera.x, 'Not horizontally centered on target after follow with easing')
+        self.assertEqual(5, camera.y, 'Not vertically centered on target after follow with easing')
+
+        # Easing was updated to ease to the new center of the target
+        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(75, 35))
+        camera.follow_easing.update.assert_called_with(456)
 
     def test_camera_can_not_retract_past_boundary(self):
         """The camera will not retract past the boundary."""
