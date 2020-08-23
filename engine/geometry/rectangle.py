@@ -41,3 +41,13 @@ class Rectangle(object):
     def y(self):
         """Returns the y coordinate of rectangle."""
         return self._coordinates.y
+
+    @x.setter
+    def x(self, x):
+        """Sets the x coordinate of rectangle."""
+        self._coordinates.x = x
+
+    @y.setter
+    def y(self, y):
+        """Sets the y coordinate of rectangle."""
+        self._coordinates.y = y
