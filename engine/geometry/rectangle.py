@@ -33,6 +33,11 @@ class Rectangle(object):
         return self._coordinates
 
     @property
+    def center(self):
+        """Returns the coordinates of the center of the rectangle."""
+        return self.coordinates + (self.width // 2, self.height // 2)
+
+    @property
     def x(self):
         """Returns the x coordinate of rectangle."""
         return self._coordinates.x
