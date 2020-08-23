@@ -241,3 +241,13 @@ class TestPoint2d(unittest.TestCase):
         self.assertEqual(2, point.y)
         self.assertEqual(3, point2.x)
         self.assertEqual(2, point2.y)
+
+    def test_point_rounding(self):
+        """Rounding points rounds both coordinates."""
+        point = Point2d(1.1, 1.9)
+
+        point2 = round(point)
+
+        self.assertEqual(1, point.x)
+        self.assertEqual(2, point.y)
+        self.assertEqual(point, point2)

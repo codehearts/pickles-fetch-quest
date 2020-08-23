@@ -210,3 +210,12 @@ class Point2d(object):
         """
         self.x, self.y = self._call_with_other(operator.floordiv, other)
         return self
+
+    def __round__(self, digits=None):
+        """Rounds the x and y coordinates to the number of digits.
+
+        Kwargs:
+            digits (int, optional): The number of digits to round the point to.
+        """
+        self.x, self.y = round(self.x, digits), round(self.y, digits)
+        return self
