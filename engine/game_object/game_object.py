@@ -16,7 +16,7 @@ class GameObject(geometry.Rectangle, EventDispatcher):
             Read-only.
         width (int): The width of the object's geometry.
         height (int): The height of the object's geometry.
-        physics (:obj:`engine.geometry.Physics2d`):
+        physics (:obj:`engine.physics.Physics2d`):
             Physics that the object obeys on update.
 
     Events:
