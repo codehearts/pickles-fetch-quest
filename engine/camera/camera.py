@@ -1,4 +1,4 @@
-from engine.geometry import Rectangle
+from engine.geometry import Rectangle, Point2d
 from pyglet import gl
 
 
@@ -17,6 +17,8 @@ class Camera(Rectangle):
             A target for the camera to follow, or None for manual control.
         follow_easing (:obj:`easing.EasingCurve` or None):
             An easing curve to apply when following a target
+        follow_lead (:obj:`geometry.Point2d` or None):
+            Pixels for the camera to lead by when following a target in motion.
     """
 
     def __init__(self, width, height):
@@ -34,6 +36,7 @@ class Camera(Rectangle):
         # Object tracking
         self.follow = None
         self.follow_easing = None
+        self.follow_lead = Point2d(0, 0)
 
         # Boundary to restrict the camera to
         self._x_boundary = None
@@ -71,13 +74,20 @@ class Camera(Rectangle):
             ms (int): Number of milliseconds since the last update.
         """
         if self.follow is not None:
-            if self.easing is not None:
-                # Update the curve if its end is no longer the target's center
-                if self.easing.end != self.follow.center:
-                    self.easing.reset(self.center, self.follow.center)
+            if self.follow_easing is not None:
+                follow_direction = self._get_follow_direction()
 
-                self.easing.update(ms)
-                self.look_at(*self.easing.value)
+                if follow_direction == (0, 0):
+                    # Object is at rest, focus on its center if not already
+                    if self.follow_easing.end != self.follow.center:
+                        self.follow_easing.reset(self.center, self.follow.center)
+                else:
+                    # Object is moving, update curve to follow with lead space
+                    with_lead = self.follow.center + self.follow_lead * follow_direction
+                    self.follow_easing.reset(self.center, with_lead)
+
+                self.follow_easing.update(ms)
+                self.look_at(*self.follow_easing.value)
             else:
                 self.look_at(*self.follow.center)
 
@@ -105,3 +115,17 @@ class Camera(Rectangle):
             An int of the coordinate within the boundary.
         """
         return value if boundary is None else max(min(boundary, value), 0)
+
+    def _get_follow_direction(self):
+        """Returns the directional vector of the followed target.
+
+        Returns:
+            A :obj:`geometry.Point2d` of the directional vector, such as
+            `(-1, 1)` for an object moving left and up, or `(0, 0)` for an
+            object at rest.
+        """
+        if self.follow.physics is None:
+            return Point2d(0, 0)
+
+        velocity = self.follow.physics.velocity
+        return Point2d(min(1, max(-1, velocity.x)), min(1, max(-1, velocity.y)))

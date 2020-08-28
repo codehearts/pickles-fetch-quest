@@ -68,6 +68,94 @@ class TestCamera(unittest.TestCase):
         camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(75, 35))
         camera.follow_easing.update.assert_called_with(456)
 
+    def test_update_eases_to_follow_target_with_positive_horizontal_lead(self):
+        """Updating the camera with leading eases ahead of followed object."""
+        # Create an object in the center of the camera
+        lead = 123
+        target = Mock(center=Point2d(50, 25), physics=Mock(velocity=Point2d(0, 0)))
+        camera = Camera(100, 50)
+        camera.follow = target
+        camera.follow_lead = Point2d(lead, 0)
+        camera.follow_easing = Mock(value=Point2d(50, 25))
+        camera.update(1)
+
+        # Easing was updated to view the center of the resting target
+        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+
+        # Move the object to be centered at (75, 25)
+        target.physics.velocity.x = 10 # The x velocity will be a positive value
+        target.center = Point2d(75, 25)
+        camera.update(1)
+
+        # Easing had lead applied when following moving target
+        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(75 + lead, 25))
+
+    def test_update_eases_to_follow_target_with_negative_horizontal_lead(self):
+        """Updating the camera with leading eases ahead of followed object."""
+        # Create an object in the center of the camera
+        lead = 123
+        target = Mock(center=Point2d(50, 25), physics=Mock(velocity=Point2d(0, 0)))
+        camera = Camera(100, 50)
+        camera.follow = target
+        camera.follow_lead = Point2d(lead, 0)
+        camera.follow_easing = Mock(value=Point2d(50, 25))
+        camera.update(1)
+
+        # Easing was updated to view the center of the resting target
+        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+
+        # Move the object to be centered at (25, 25)
+        target.physics.velocity.x = -10 # The x velocity will be a negative value
+        target.center = Point2d(25, 25)
+        camera.update(1)
+
+        # Easing had lead applied when following moving target
+        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(25 - lead, 25))
+
+    def test_update_eases_to_follow_target_with_positive_vertical_lead(self):
+        """Updating the camera with leading eases ahead of followed object."""
+        # Create an object in the center of the camera
+        lead = 123
+        target = Mock(center=Point2d(50, 25), physics=Mock(velocity=Point2d(0, 0)))
+        camera = Camera(100, 50)
+        camera.follow = target
+        camera.follow_lead = Point2d(0, lead)
+        camera.follow_easing = Mock(value=Point2d(50, 25))
+        camera.update(1)
+
+        # Easing was updated to view the center of the resting target
+        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+
+        # Move the object to be centered at (50, 50)
+        target.physics.velocity.y = 10 # The y velocity will be a positive value
+        target.center = Point2d(50, 50)
+        camera.update(1)
+
+        # Easing had lead applied when following moving target
+        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(50, 50 + lead))
+
+    def test_update_eases_to_follow_target_with_negative_vertical_lead(self):
+        """Updating the camera with leading eases ahead of followed object."""
+        # Create an object in the center of the camera
+        lead = 123
+        target = Mock(center=Point2d(50, 25), physics=Mock(velocity=Point2d(0, 0)))
+        camera = Camera(100, 50)
+        camera.follow = target
+        camera.follow_lead = Point2d(0, lead)
+        camera.follow_easing = Mock(value=Point2d(50, 25))
+        camera.update(1)
+
+        # Easing was updated to view the center of the resting target
+        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+
+        # Move the object to be centered at (50, 0)
+        target.physics.velocity.y = -10 # The y velocity will be a negative value
+        target.center = Point2d(50, 0)
+        camera.update(1)
+
+        # Easing had lead applied when following moving target
+        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(50, 0 - lead))
+
     def test_camera_can_not_retract_past_boundary(self):
         """The camera will not retract past the boundary."""
         camera = Camera(100, 50)
