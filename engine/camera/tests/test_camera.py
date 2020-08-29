@@ -315,37 +315,47 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(100, camera.x, 'Camera exceeded horizontal bounds')
         self.assertEqual(50, camera.y, 'Camera exceeded vertical bounds')
 
+    @patch('pyglet.gl.glScalef')
+    @patch('pyglet.gl.glTranslatef')
     @patch('pyglet.gl.glPushMatrix')
-    def test_attach_creates_new_matrix(self, mock_push_matrix):
+    def test_attach_creates_new_matrix(self, push, translate, scale):
         """Attaching the camera creates a new OpenGL matrix."""
         camera = Camera(100, 50)
         camera.attach()
 
-        mock_push_matrix.assert_called_once()
+        push.assert_called_once()
 
+    @patch('pyglet.gl.glScalef')
     @patch('pyglet.gl.glTranslatef')
-    def test_attach_translates_gl_context_to_coordinates(self, mock_translate):
+    @patch('pyglet.gl.glPushMatrix')
+    def test_attach_translates_gl_context_to_coordinates(self, push, translate,
+                                                         scale):
         """Attaching the camera translates the OpenGL context."""
         camera = Camera(100, 50)
         camera.look_at(100, 50)
         camera.attach()
 
-        mock_translate.assert_called_once_with(-50, -25, 0)
+        translate.assert_called_once_with(-50, -25, 0)
 
     @patch('pyglet.gl.glScalef')
-    def test_attach_scales_gl_context(self, mock_scale):
+    @patch('pyglet.gl.glTranslatef')
+    @patch('pyglet.gl.glPushMatrix')
+    def test_attach_scales_gl_context(self, push, translate, scale):
         """Attaching the camera scales the OpenGL context."""
         camera = Camera(100, 50)
         camera.scale = 2
         camera.attach()
 
-        mock_scale.assert_called_once_with(camera.scale, camera.scale, 0)
+        scale.assert_called_once_with(camera.scale, camera.scale, 0)
 
+    @patch('pyglet.gl.glScalef')
+    @patch('pyglet.gl.glTranslatef')
+    @patch('pyglet.gl.glPushMatrix')
     @patch('pyglet.gl.glPopMatrix')
-    def test_detach_pops_matrix(self, mock_pop_matrix):
+    def test_detach_pops_matrix(self, pop, push, translate, scale):
         """Detaching the camera pops its OpenGL matrix."""
         camera = Camera(100, 50)
         camera.attach()
         camera.detach()
 
-        mock_pop_matrix.assert_called_once()
+        pop.assert_called_once()
