@@ -17,7 +17,7 @@ class TestTmxLayer(unittest.TestCase):
         """Graphics are created when loading tile layers."""
         # 2x2 tiles on a 6x3 map
         mock_xml = '<map width="6" height="3" tilewidth="2">\n'
-        mock_xml += '\t<layer name="test" />\n'
+        mock_xml += '\t<layer name="test" width="6" height="3" />\n'
         mock_xml += '</map>\n'
         mock_map_node = ElementTree.parse(StringIO(mock_xml)).getroot()
         mock_layer_node = mock_map_node.find('layer')
@@ -61,7 +61,7 @@ class TestTmxLayer(unittest.TestCase):
         """Objects are created when loading object layers."""
         # 2x2 tiles on a 6x3 map
         mock_xml = '<map width="6" height="3" tilewidth="2">\n'
-        mock_xml += '\t<objectgroup name="test" />\n'
+        mock_xml += '\t<objectgroup name="test" width="6" height="3" />\n'
         mock_xml += '</map>\n'
         mock_map_node = ElementTree.parse(StringIO(mock_xml)).getroot()
         mock_layer_node = mock_map_node.find('objectgroup')

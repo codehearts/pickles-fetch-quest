@@ -11,7 +11,7 @@ class TestRoomLayerCollection(unittest.TestCase):
         mock_layers = Mock(a=Mock(), b=Mock(), c=Mock())
 
         # Create a collection with 3 layers (a, b, and c)
-        collection = RoomLayerCollection()
+        collection = RoomLayerCollection(1, 1)
         collection.add_layer('a', mock_layers.a)
         collection.add_layer('b', mock_layers.b)
         collection.add_layer('c', mock_layers.c)
@@ -25,7 +25,7 @@ class TestRoomLayerCollection(unittest.TestCase):
         mock_layers = Mock(a=Mock(), b=Mock(), c=Mock())
 
         # Create a collection with 3 layers
-        collection = RoomLayerCollection()
+        collection = RoomLayerCollection(1, 1)
         collection.add_layer('a', mock_layers.a)
         collection.add_layer('b', mock_layers.b)
         collection.add_layer('c', mock_layers.c)
@@ -40,7 +40,7 @@ class TestRoomLayerCollection(unittest.TestCase):
         mock_layers = Mock(a=Mock(), b=Mock(), c=Mock())
 
         # Create a collection with 3 layers
-        collection = RoomLayerCollection()
+        collection = RoomLayerCollection(1, 1)
         collection.add_layer('a', mock_layers.a)
         collection.add_layer('b', mock_layers.b)
         collection.add_layer('c', mock_layers.c)
@@ -49,3 +49,21 @@ class TestRoomLayerCollection(unittest.TestCase):
 
         mock_layers.assert_has_calls(
             [call.a.draw(), call.b.draw(), call.c.draw()])
+
+    def test_collection_width_is_read_only(self):
+        """Layer collection width is read-only."""
+        collection = RoomLayerCollection(1, 0)
+
+        self.assertEqual(1, collection.width)
+
+        with self.assertRaises(AttributeError, msg='can\'t set attribute'):
+            collection.width = 2
+
+    def test_collection_height_is_read_only(self):
+        """Layer collection height is read-only."""
+        collection = RoomLayerCollection(0, 1)
+
+        self.assertEqual(1, collection.height)
+
+        with self.assertRaises(AttributeError, msg='can\'t set attribute'):
+            collection.height = 2

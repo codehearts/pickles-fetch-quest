@@ -1,5 +1,6 @@
-from engine import audio, collision, disk, factory, geometry, graphics
-from engine import game_object, key_handler, physics, room, tiled_editor
+from engine import audio, camera, collision, disk, easing, factory, geometry
+from engine import game_object, graphics, key_handler, physics, room
+from engine import tiled_editor
 import pyglet.app
 import pyglet.gl
 import player
@@ -7,9 +8,14 @@ import player
 
 disk.DiskLoader.set_resource_paths(['resources/'])
 
+game_width = 160
+game_height = 140
+game_scale = 4
+
 audio_director = audio.AudioDirector(master_volume=0.99)
 graphics_director = graphics.GraphicsController(
-    160, 140, title="Pickle's Fetch Quest")
+    game_width * game_scale, game_height * game_scale,
+    title="Pickle's Fetch Quest")
 key_handler = key_handler.KeyHandler(graphics_director)
 collision_resolver = collision.CollisionResolver2d()
 
@@ -58,11 +64,21 @@ tmx_factory.add_recipe('floor', create_floor_physics)
 entry_room_loader = tiled_editor.TmxLoader('rooms/entry-room.tmx', tmx_factory)
 entry_room = room.Room(entry_room_loader.layers)
 
+camera = camera.Camera(game_width, game_height)
+camera.set_boundary(entry_room.width, entry_room.height)
+camera.scale = game_scale
+camera.follow = pickle
+camera.follow_lead = geometry.Point2d(48, 0)
+camera.follow_deadzone = geometry.Rectangle(
+    x=game_width // 2 - 16, y=game_height // 2, width=32, height=48)
+camera.follow_easing = easing.LinearInterpolation(0.08)
+
 
 def on_update(dt):
     collision_resolver.resolve()
     key_handler.update(dt)
     entry_room.update(dt)
+    camera.update(dt)
 
 
 graphics_director.add_listeners(on_update=on_update)
@@ -71,7 +87,9 @@ graphics_director.add_listeners(on_update=on_update)
 @graphics_director._window.event
 def on_draw():
     graphics_director._window.clear()
+    camera.attach()
     entry_room.draw()
+    camera.detach()
 
 
 if __name__ == "__main__":
