@@ -83,29 +83,31 @@ class Camera(Rectangle):
         Args:
             ms (int): Number of milliseconds since the last update.
         """
-        if self.follow is not None:
-            if self.follow_easing is not None:
-                follow_vector = self._get_follow_vector()
-                target_center = self._center_with_deadzone(
-                    self.follow, follow_vector)
+        # There is nothing to update if nothing is being followed
+        if self.follow is None:
+            return
 
-                if follow_vector == (0, 0):
-                    # Object is at rest, focus on its center if not already
-                    if self.follow_easing.end != target_center:
-                        self.follow_easing.reset(self.center, target_center)
-                else:  # Target is moving, update curve to follow with lead
-                    # Convert (True, False) to (0, 1)
-                    # Multiplying by this zeroes any axis with deadzone applied
-                    deadzone = list(map(
-                        lambda apply: int(not apply), self._apply_deadzone))
+        # If there is no easing, track the object directly
+        if self.follow_easing is None:
+            self.look_at(*self.follow.center)
+            return
 
-                    lead = self.follow_lead * deadzone * follow_vector
-                    self.follow_easing.reset(self.center, target_center + lead)
+        # Target movement vector and center (with respect to deadzone)
+        target_vector = self._get_follow_vector()
+        target_center = Point2d(
+            self._center_with_deadzone(self.follow, target_vector, 'x'),
+            self._center_with_deadzone(self.follow, target_vector, 'y'))
 
-                self.follow_easing.update(ms)
-                self.look_at(*self.follow_easing.value)
-            else:
-                self.look_at(*self.follow.center)
+        if target_vector != (0, 0):
+            # Target is moving, update the curve to follow it with lead
+            self.follow_easing.reset(
+                self.center, self._apply_lead(target_center, target_vector))
+        elif self.follow_easing.end != target_center:
+            # Target is not moving and curve is out of date, reset to center
+            self.follow_easing.reset(self.center, target_center)
+
+        self.follow_easing.update(ms)
+        self.look_at(*self.follow_easing.value)
 
     def attach(self):
         """Applies camera transformations to subsequent draws.
@@ -148,7 +150,26 @@ class Camera(Rectangle):
             min(1, max(-1, velocity.x)),
             min(1, max(-1, velocity.y)))
 
-    def _center_with_deadzone(self, target, follow_vector):
+    def _apply_lead(self, target_center, target_vector):
+        """Applies lead distance to the given coordinates.
+
+        Args:
+            target_center (:obj:`geometry.Point2d`):
+                Center coordinates of the target to apply lead to.
+            target_vector (:obj:`geometry.Point2d`):
+                Vector of the target's movement.
+        """
+        lead = self.follow_lead * target_vector
+
+        # Do not apply lead if the deadzone applies to the axis
+        if self._apply_deadzone[0]:
+            lead.x = 0
+        if self._apply_deadzone[1]:
+            lead.y = 0
+
+        return target_center + lead
+
+    def _center_with_deadzone(self, target, target_vector, axis):
         """Centers on a target with respect to the camera's deadzone.
 
         This avoids moving the camera when an target is within the deadzone
@@ -157,36 +178,34 @@ class Camera(Rectangle):
         Args:
             target (:obj:`game_object.GameObject`):
                 Target to center on with respect to the deadzone.
-            follow_vector (:obj:`geometry.Point2d`):
-                Vector of the followed target's movement.
+            target_vector (:obj:`geometry.Point2d`):
+                Vector of the target's movement.
+            axis (str): Axis to center along, either 'x' or 'y'.
 
         Returns:
-            :obj:`geometry.Point2d` of the coordinates bounded by the deadzone.
+            An int of the coordinate bounded by the deadzone along the axis.
         """
-        center_coordinates = [target.center.x, target.center.y]
+        axis_int = 0 if axis == 'x' else 1
+        dimension = ('width', 'height')[axis_int]
 
-        deadzone_overlaps = (
-            detect_overlap_1d(
-                self.x + self._follow_deadzone.x, self._follow_deadzone.width,
-                target.x, target.width),
-            detect_overlap_1d(
-                self.y + self._follow_deadzone.y, self._follow_deadzone.height,
-                target.y, target.height)
-        )
+        within_deadzone = detect_overlap_1d(
+            getattr(self, axis) + getattr(self._follow_deadzone, axis),
+            getattr(self._follow_deadzone, dimension),
+            getattr(target, axis),
+            getattr(target, dimension))
 
-        for axis in (0, 1):
-            if deadzone_overlaps[axis] and follow_vector[axis] == 0:
-                # Apply deadzone when object is at rest within it
-                self._apply_deadzone[axis] = True
-            elif not deadzone_overlaps[axis]:
-                # Stop applying deadzone once target has moved outside
-                self._apply_deadzone[axis] = False
+        if not within_deadzone:
+            # Stop applying deadzone if target has moved outside
+            self._apply_deadzone[axis_int] = False
+        elif target_vector[axis_int] == 0:
+            # Apply deadzone when object is at rest within it
+            self._apply_deadzone[axis_int] = True
 
-            # Don't move the camera along an axis if the deadzone applies
-            if self._apply_deadzone[axis]:
-                center_coordinates[axis] = self.center[axis]
+        # Don't move the camera along the axis if the deadzone applies
+        if self._apply_deadzone[axis_int]:
+            return self.center[axis_int]
 
-        return Point2d(*center_coordinates)
+        return target.center[axis_int]
 
     @property
     def follow_deadzone(self):
