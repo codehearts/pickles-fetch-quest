@@ -20,6 +20,25 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(50, camera.x, 'Camera is not horizontally centered')
         self.assertEqual(25, camera.y, 'Camera is not vertically centered')
 
+    def test_update_centers_on_followed_object(self):
+        """Updating the camera centers it on the followed object."""
+        # Create an object in the center of the camera
+        target = Mock(x=40, width=20, y=20, height=10)
+        camera = Camera(100, 50)
+        camera.follow = target
+        camera.update(123)
+
+        self.assertEqual(0, camera.x, 'Not horizontally centered on target')
+        self.assertEqual(0, camera.y, 'Not vertically centered on target')
+
+        # Move the object to be centered at (75, 40)
+        target.x = 65
+        target.y = 30
+        camera.update(123)
+
+        self.assertEqual(25, camera.x, 'Not horizontally centered after follow')
+        self.assertEqual(10, camera.y, 'Not vertically centered after follow')
+
     def test_camera_can_not_retract_past_boundary(self):
         """The camera will not retract past the boundary."""
         camera = Camera(100, 50)

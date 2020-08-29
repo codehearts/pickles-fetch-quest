@@ -8,6 +8,8 @@ class Camera(object):
         x (int): The x coordinate of the camera's lower left corner.
         y (int): The y coordinate of the camera's lower left corner.
         scale (float): The scaling to apply to the visible scene.
+        follow (:obj:`game_object.GameObject` or None):
+            A target for the camera to follow, or None for manual control.
     """
 
     def __init__(self, width, height):
@@ -20,6 +22,8 @@ class Camera(object):
         self._width = width
         self._height = height
         self.scale = 1
+
+        self.follow = None
 
         self._x = 0
         self._y = 0
@@ -63,7 +67,8 @@ class Camera(object):
         Args:
             ms (int): Number of milliseconds since the last update.
         """
-        pass
+        if self.follow is not None:
+            self.look_at(self.follow.center.x, self.follow.center.y)
 
     def attach(self):
         """Applies camera transformations to subsequent draws.
