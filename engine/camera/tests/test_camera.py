@@ -1,6 +1,6 @@
 from ..camera import Camera
 from ...geometry import Point2d
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 import unittest
 
 
@@ -29,50 +29,53 @@ class TestCamera(unittest.TestCase):
         camera.follow = target
         camera.update(123)
 
-        self.assertEqual(0, camera.x, 'Not horizontally centered on target')
-        self.assertEqual(0, camera.y, 'Not vertically centered on target')
+        self.assertEqual(0, camera.x, 'Not centered horizontal on target')
+        self.assertEqual(0, camera.y, 'Not centered vertical on target')
 
         # Move the object to be centered at (75, 35)
-        target.center=Point2d(75, 35)
+        target.center = Point2d(75, 35)
         camera.update(123)
 
-        self.assertEqual(25, camera.x, 'Not horizontally centered after follow')
-        self.assertEqual(10, camera.y, 'Not vertically centered after follow')
+        self.assertEqual(25, camera.x, 'Not centered horizontal after follow')
+        self.assertEqual(10, camera.y, 'Not centered vertical after follow')
 
     def test_update_centers_on_followed_object_with_easing(self):
         """Updating the camera eases to the center of the followed object."""
         # Create an object in the center of the camera
-        target = Mock(width=20, height=10, center=Point2d(50, 25),
-                    physics=Mock(velocity=Point2d(0, 0)))
+        target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
+                      physics=Mock(velocity=Point2d(0, 0)))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_easing = Mock(value=Point2d(50, 25))
         camera.update(123)
 
-        self.assertEqual(0, camera.x, 'Not horizontally centered on target with easing')
-        self.assertEqual(0, camera.y, 'Not vertically centered on target with easing')
+        self.assertEqual(0, camera.x, 'Target x-axis not centered with easing')
+        self.assertEqual(0, camera.y, 'Target y-axis not centered with easing')
 
         # Easing was updated to view the center of the target
-        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
         camera.follow_easing.update.assert_called_once_with(123)
+        camera.follow_easing.reset.assert_called_once_with(
+            Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (75, 35)
         camera.follow_easing.value = Point2d(55, 30)
         target.center = Point2d(75, 35)
         camera.update(456)
 
-        self.assertEqual(5, camera.x, 'Not horizontally centered on target after follow with easing')
-        self.assertEqual(5, camera.y, 'Not vertically centered on target after follow with easing')
+        self.assertEqual(5, camera.x, 'Target x-axis not centered with easing')
+        self.assertEqual(5, camera.y, 'Target y-axis not centered with easing')
 
         # Easing was updated to ease to the new center of the target
-        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(75, 35))
         camera.follow_easing.update.assert_called_with(456)
+        camera.follow_easing.reset.assert_called_with(
+            Point2d(50, 25), Point2d(75, 35))
 
     def test_update_eases_to_follow_target_with_positive_horizontal_lead(self):
         """Updating the camera with leading eases ahead of followed object."""
         # Create an object in the center of the camera
         lead = 123
-        target = Mock(center=Point2d(50, 25), physics=Mock(velocity=Point2d(0, 0)))
+        target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
+                      physics=Mock(velocity=Point2d(0, 0)))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_lead = Point2d(lead, 0)
@@ -80,21 +83,24 @@ class TestCamera(unittest.TestCase):
         camera.update(1)
 
         # Easing was updated to view the center of the resting target
-        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+        camera.follow_easing.reset.assert_called_once_with(
+            Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (75, 25)
-        target.physics.velocity.x = 10 # The x velocity will be a positive value
+        target.physics.velocity.x = 10  # x velocity will be a positive value
         target.center = Point2d(75, 25)
         camera.update(1)
 
         # Easing had lead applied when following moving target
-        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(75 + lead, 25))
+        camera.follow_easing.reset.assert_called_with(
+            Point2d(50, 25), Point2d(75 + lead, 25))
 
     def test_update_eases_to_follow_target_with_negative_horizontal_lead(self):
         """Updating the camera with leading eases ahead of followed object."""
         # Create an object in the center of the camera
         lead = 123
-        target = Mock(center=Point2d(50, 25), physics=Mock(velocity=Point2d(0, 0)))
+        target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
+                      physics=Mock(velocity=Point2d(0, 0)))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_lead = Point2d(lead, 0)
@@ -102,21 +108,24 @@ class TestCamera(unittest.TestCase):
         camera.update(1)
 
         # Easing was updated to view the center of the resting target
-        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+        camera.follow_easing.reset.assert_called_once_with(
+            Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (25, 25)
-        target.physics.velocity.x = -10 # The x velocity will be a negative value
+        target.physics.velocity.x = -10  # x velocity will be a negative value
         target.center = Point2d(25, 25)
         camera.update(1)
 
         # Easing had lead applied when following moving target
-        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(25 - lead, 25))
+        camera.follow_easing.reset.assert_called_with(
+            Point2d(50, 25), Point2d(25 - lead, 25))
 
     def test_update_eases_to_follow_target_with_positive_vertical_lead(self):
         """Updating the camera with leading eases ahead of followed object."""
         # Create an object in the center of the camera
         lead = 123
-        target = Mock(center=Point2d(50, 25), physics=Mock(velocity=Point2d(0, 0)))
+        target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
+                      physics=Mock(velocity=Point2d(0, 0)))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_lead = Point2d(0, lead)
@@ -124,21 +133,24 @@ class TestCamera(unittest.TestCase):
         camera.update(1)
 
         # Easing was updated to view the center of the resting target
-        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+        camera.follow_easing.reset.assert_called_once_with(
+            Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (50, 50)
-        target.physics.velocity.y = 10 # The y velocity will be a positive value
+        target.physics.velocity.y = 10  # y velocity will be a positive value
         target.center = Point2d(50, 50)
         camera.update(1)
 
         # Easing had lead applied when following moving target
-        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(50, 50 + lead))
+        camera.follow_easing.reset.assert_called_with(
+            Point2d(50, 25), Point2d(50, 50 + lead))
 
     def test_update_eases_to_follow_target_with_negative_vertical_lead(self):
         """Updating the camera with leading eases ahead of followed object."""
         # Create an object in the center of the camera
         lead = 123
-        target = Mock(center=Point2d(50, 25), physics=Mock(velocity=Point2d(0, 0)))
+        target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
+                      physics=Mock(velocity=Point2d(0, 0)))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_lead = Point2d(0, lead)
@@ -146,15 +158,144 @@ class TestCamera(unittest.TestCase):
         camera.update(1)
 
         # Easing was updated to view the center of the resting target
-        camera.follow_easing.reset.assert_called_once_with(Point2d(50, 25), Point2d(50, 25))
+        camera.follow_easing.reset.assert_called_once_with(
+            Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (50, 0)
-        target.physics.velocity.y = -10 # The y velocity will be a negative value
+        target.physics.velocity.y = -10  # y velocity will be a negative value
         target.center = Point2d(50, 0)
         camera.update(1)
 
         # Easing had lead applied when following moving target
-        camera.follow_easing.reset.assert_called_with(Point2d(50, 25), Point2d(50, 0 - lead))
+        camera.follow_easing.reset.assert_called_with(
+            Point2d(50, 25), Point2d(50, 0 - lead))
+
+    def test_camera_does_not_move_with_object_in_deadzone(self):
+        """A camera does not move when a followed object is in the deadzone."""
+        # Create an object in the center of the camera
+        target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
+                      physics=Mock(velocity=Point2d(0, 0)))
+        camera = Camera(100, 50)
+        camera.follow = target
+        camera.follow_easing = Mock(value=Point2d(50, 25))
+        camera.follow_deadzone = Mock(x=10, y=5, width=80, height=40)
+
+        # Target moves right within deadzone
+        target.physics.velocity.x = 10
+        target.center = Point2d(75, 25)
+        target.x = 65
+        camera.update(1)
+
+        # Target moves left within deadzone
+        target.physics.velocity.x = -10
+        target.center = Point2d(50, 25)
+        target.x = 40
+        camera.update(1)
+
+        # Target moves up within deadzone
+        target.physics.velocity.y = 10
+        target.physics.velocity.x = 0
+        target.center = Point2d(50, 35)
+        target.y = 30
+        camera.update(1)
+
+        # Target moves down within deadzone, even with lead
+        camera.follow_lead = Point2d(0, 100)
+        target.physics.velocity.y = -10
+        target.center = Point2d(50, 25)
+        target.y = 20
+        camera.update(1)
+
+        # Camera never moved
+        camera.follow_easing.reset.assert_has_calls(
+            [call(camera.center, camera.center)] * 4)
+
+    def test_camera_moves_once_object_leaves_dead_zone(self):
+        """A camera only moves once the followed object leaves the deadzone."""
+        # Create an object in the center of the camera
+        target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
+                      physics=Mock(velocity=Point2d(0, 0)))
+        camera = Camera(100, 50)
+        camera.follow = target
+        camera.follow_easing = Mock(value=Point2d(50, 25))
+        camera.follow_deadzone = Mock(x=10, y=5, width=80, height=40)
+
+        # Target moves right within deadzone
+        target.physics.velocity.x = 10
+        target.center = Point2d(99, 25)
+        target.x = 89
+        camera.update(1)
+
+        # Target moves right outside deadzone
+        target.center = Point2d(100, 25)
+        target.x = 90
+        camera.update(1)
+
+        # Rest within the deadzone to reapply it
+        target.physics.velocity.x = 0
+        target.center = Point2d(50, 25)
+        target.x = 40
+        camera.update(1)
+
+        # Target moves left within deadzone
+        target.physics.velocity.x = -10
+        target.center = Point2d(1, 25)
+        target.x = -9
+        camera.update(1)
+
+        # Target moves left outside deadzone
+        target.center = Point2d(0, 25)
+        target.x = -10
+        camera.update(1)
+
+        # Rest within the deadzone to reapply it
+        target.physics.velocity.x = 0
+        target.center = Point2d(50, 25)
+        target.x = 40
+        camera.update(1)
+
+        # Target moves up within deadzone
+        target.physics.velocity.y = 10
+        target.center = Point2d(50, 49)
+        target.y = 44
+        camera.update(1)
+
+        # Target moves up outside deadzone
+        target.center = Point2d(50, 50)
+        target.y = 45
+        camera.update(1)
+
+        # Rest within the deadzone to reapply it
+        target.physics.velocity.y = 0
+        target.center = Point2d(50, 25)
+        target.y = 20
+        camera.update(1)
+
+        # Target moves down within deadzone
+        target.physics.velocity.y = -10
+        target.center = Point2d(50, 1)
+        target.y = -4
+        camera.update(1)
+
+        # Target moves down outside deadzone
+        target.center = Point2d(50, 0)
+        target.y = -5
+        camera.update(1)
+
+        # Camera never moved
+        camera.follow_easing.reset.assert_has_calls([
+            call(Point2d(50, 25), Point2d(50, 25)),  # Move right
+            call(Point2d(50, 25), Point2d(100, 25)),
+            call(Point2d(50, 25), Point2d(50, 25)),
+            call(Point2d(50, 25), Point2d(50, 25)),  # Move left
+            call(Point2d(50, 25), Point2d(0, 25)),
+            call(Point2d(50, 25), Point2d(50, 25)),
+            call(Point2d(50, 25), Point2d(50, 25)),  # Move up
+            call(Point2d(50, 25), Point2d(50, 50)),
+            call(Point2d(50, 25), Point2d(50, 25)),
+            call(Point2d(50, 25), Point2d(50, 25)),  # Move down
+            call(Point2d(50, 25), Point2d(50, 0)),
+            ])
 
     def test_camera_can_not_retract_past_boundary(self):
         """The camera will not retract past the boundary."""
