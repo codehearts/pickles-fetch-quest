@@ -14,7 +14,20 @@ class CollisionResolver2d(object):
         """
         super(CollisionResolver2d, self).__init__()
         self._registered_entries = []
-        self._collision_cache = {}
+
+        # Object position cache from past collisions, to limit notifications
+        # Objects which collided have their positions store like so:
+        #     [(first_object, second_object)] = {
+        #         'first' => cached first_object.coordinates,
+        #         'second' => cached second_object.coordinates,
+        #         'delta' => cached velocity_delta,
+        #     }
+        # Note: first_object < second_object, compared by memory address
+        self._collision_position_cache = {}
+
+        # Collision resolution cache for the current resolution pass
+        # This is a mapping of (first, second) => delta
+        self._resolved_collisions = {}
 
     def register(self, game_object, method):
         """Registers a game object to be resolved using the given method.
@@ -46,6 +59,9 @@ class CollisionResolver2d(object):
             # Add the current entry to the sweep list
             sweep_list.append(entry)
 
+        # Clean the collision position cache after resolution
+        self._clean_position_cache()
+
     def _narrow_phase(self, first, second):
         """Detects a collision between the two game objects and resolves it.
 
@@ -64,6 +80,7 @@ class CollisionResolver2d(object):
             # If either object is detection-only, notify of the collision
             self._notify_collision(first.geometry, second.geometry)
         else:
+            # If neither object is detection-only, resolve the collision
             self._resolve_collision(first.geometry, second.geometry)
 
         return first
@@ -77,23 +94,69 @@ class CollisionResolver2d(object):
             second (:obj:`engine.game_object.GameObject`):
                 The second object in the collision.
         """
-        # If neither object is detection-only, resolve the collision
-        delta = resolve_game_object_collision(first, second)
+        velocity_delta = resolve_game_object_collision(first, second)
 
-        if delta != (0, 0):
-            # Look for the delta from a prior collision between these objects
-            cache = self._get_cached_delta(first, second)
+        is_repeat = self._is_repeat_collision(first, second, velocity_delta)
 
-            # Notify collision if displacement increased on any axis
-            if (not cache) or (delta[0] > cache[0]) or (delta[1] > cache[1]):
-                self._notify_collision(first, second)
+        # Notify if a collision occurred and is not a repeat
+        if velocity_delta != (0, 0) and not is_repeat:
+            self._notify_collision(first, second)
 
-            # Cache the delta from this collision
-            self._collision_cache.setdefault(first, {})[second] = delta
-            self._collision_cache.setdefault(second, {})[first] = delta
+            # Cache this new collision
+            key = self._get_cache_key(first, second)
+            self._resolved_collisions[key] = velocity_delta
 
-    def _get_cached_delta(self, first, second):
-        """Returns the cached delta for a collision between two objects.
+    def _get_cache_key(self, first, second):
+        """Creates a compound key for the given objects in the collision cache.
+
+        Returns:
+            A tuple of :obj:`game_object.GameObject` where the first and second
+            elements are always in the returned order.
+        """
+        # The first key in the cache is whichever has a lower memory address
+        if id(first) < id(second):
+            return (first, second)
+        return (second, first)
+
+    def _is_repeat_axis_collision(self, first, second, cache_entry, axis):
+        """Determines whether the collision was repeated on the axis."""
+        key = self._get_cache_key(first, second)
+        index = 0 if axis == 'x' else 1
+
+        first_changed = cache_entry['first'][index] == getattr(key[0], axis)
+        second_changed = cache_entry['second'][index] == getattr(key[1], axis)
+        axis_delta = cache_entry['delta'][index]
+
+        return first_changed and second_changed or axis_delta == 0
+
+    def _is_repeat_collision(self, first, second, velocity_delta):
+        """Checks if a collision between two objects is identical to the last.
+
+        Args:
+            first (:obj:`engine.game_object.GameObject`):
+                The first object in a collision.
+            second (:obj:`engine.game_object.GameObject`):
+                The second object in a collision.
+            velocity_delta (tuple of int):
+                Delta of the x and y velocities after resolution.
+
+        Returns:
+            True if the collision is identical to the last collision between
+            these objects, False otherwise.
+        """
+        cache = self._get_cached_collision(first, second)
+
+        # No prior collision is cached, this can't be a repeat
+        if cache is None:
+            return False
+
+        x_repeated = self._is_repeat_axis_collision(first, second, cache, 'x')
+        y_repeated = self._is_repeat_axis_collision(first, second, cache, 'y')
+
+        return x_repeated and y_repeated
+
+    def _get_cached_collision(self, first, second):
+        """Returns the cache entry for a collision between two objects.
 
         Args:
             first (:obj:`engine.game_object.GameObject`):
@@ -102,14 +165,35 @@ class CollisionResolver2d(object):
                 The second object in a collision.
 
         Returns:
-            Tuple of int if the collision was cached, otherwise an empty tuple.
+            An object with "first," "second," and "delta" fields if the
+            collision was cached, None otherwise.
         """
-        # Check if this collision is cached
-        is_cached = first in self._collision_cache and \
-            second in self._collision_cache[first]
+        cache_key = self._get_cache_key(first, second)
 
-        # Look for the delta from a prior collision between these objects
-        return self._collision_cache[first][second] if is_cached else ()
+        if cache_key in self._collision_position_cache:
+            return self._collision_position_cache[cache_key]
+        return None
+
+    def _clean_position_cache(self):
+        """Removes positional cache entries for objects which have moved."""
+        clean_position_cache = {}
+
+        # Create a new positional cache of repeated collisions
+        for key, cache in self._collision_position_cache.items():
+            if self._is_repeat_collision(key[0], key[1], cache['delta']):
+                clean_position_cache[key] = cache
+
+        self._collision_position_cache = clean_position_cache
+
+        # Cache the positions of all newly resolved collisions
+        for key, delta in self._resolved_collisions.items():
+            self._collision_position_cache[key] = {
+                'first': (key[0].x, key[0].y),
+                'second': (key[1].x, key[1].y),
+                'delta': delta
+            }
+
+        self._resolved_collisions = {}
 
     def _notify_collision(self, first, second):
         """Notifies collision if the objects weren't already colliding.
