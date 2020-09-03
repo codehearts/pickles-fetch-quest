@@ -1,6 +1,6 @@
 from distutils.version import StrictVersion
 from .tmx_layer_loader import TmxLayerLoader
-from .tmx_tileset import load_tmx_tileset
+from .tmx_tileset import load_tmx_tileset, load_tmx_tile_objects
 from engine import disk, room
 
 
@@ -49,6 +49,9 @@ class TmxLoader(object):
         # Dict of tileset indices to tile image
         self._tileset = {}
 
+        # Dict of tile object types to tileset index
+        self._tile_objects = {}
+
         # Parse each node in the TMX map
         for node in self._map_node.iter():
             self._parse_node(node)
@@ -67,7 +70,8 @@ class TmxLoader(object):
         elif node.tag in ('layer', 'objectgroup'):
             # Load the layer
             layer_loader = TmxLayerLoader(
-                node, self._map_node, self._tileset, self._object_factory)
+                node, self._map_node, self._tileset, self._tile_objects,
+                self._object_factory)
 
             # Add the layer to the collection
             self.layers.add_layer(layer_loader.name, layer_loader.layer)
@@ -80,3 +84,6 @@ class TmxLoader(object):
         """
         for i, image in load_tmx_tileset(self._path, node):
             self._tileset[i] = image
+
+        for tileset_index, tile_object_type in load_tmx_tile_objects(node):
+            self._tile_objects[tileset_index] = tile_object_type

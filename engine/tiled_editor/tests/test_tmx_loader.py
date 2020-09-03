@@ -41,11 +41,13 @@ class TestTmxLoader(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             TmxLoader('map.tmx', None)
 
+    @patch('engine.tiled_editor.tmx_loader.load_tmx_tile_objects')
     @patch('engine.tiled_editor.tmx_loader.load_tmx_tileset')
     @patch('engine.tiled_editor.tmx_loader.TmxLayerLoader')
     @patch('engine.disk.DiskLoader')
     def test_tile_layers_use_tilesets(self, MockDiskLoader, MockLayerLoader,
-                                      mock_load_tileset):
+                                      mock_load_tileset,
+                                      mock_load_tile_objects):
         """Tile layers are loaded using the loaded tilesets."""
         mock_xml = '<map version="1.2" orientation="orthogonal" infinite="0" '
         mock_xml += 'tilewidth="10" tileheight="10" width="1" height="2">\n'
@@ -72,11 +74,16 @@ class TestTmxLoader(unittest.TestCase):
         mock_load_tileset.assert_called_once_with(
             'map.tmx', mock_root_node.find('tileset'))
 
+        # Tileset tile objects were loaded
+        mock_load_tile_objects.assert_called_once_with(
+            mock_root_node.find('tileset'))
+
         # Tile layer node was loaded
         MockLayerLoader.assert_called_once_with(
             mock_layer_node,
             mock_root_node,
             {0: mock_image_0, 1: mock_image_1},
+            {},
             None)
 
         # Loaded layer was added to the collection
@@ -86,7 +93,7 @@ class TestTmxLoader(unittest.TestCase):
     @patch('engine.tiled_editor.tmx_loader.TmxLayerLoader')
     @patch('engine.disk.DiskLoader')
     def test_object_layers_are_loaded(self, MockDiskLoader, MockLayerLoader):
-        """Tile layers are loaded using the loaded tilesets."""
+        """Object layers are loaded using the object factory."""
         mock_xml = '<map version="1.2" orientation="orthogonal" infinite="0" '
         mock_xml += 'tilewidth="10" tileheight="10" width="1" height="2">\n'
         mock_xml += '\t<objectgroup/>\n'
@@ -107,7 +114,7 @@ class TestTmxLoader(unittest.TestCase):
 
         # Object layer node was loaded
         MockLayerLoader.assert_called_once_with(
-            mock_layer_node, mock_root_node, {}, mock_factory)
+            mock_layer_node, mock_root_node, {}, {}, mock_factory)
 
         # Loaded layer was added to the collection
         self.assertEqual(

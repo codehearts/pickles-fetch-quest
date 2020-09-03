@@ -44,3 +44,32 @@ def load_tmx_tileset(tmx_path, tileset_node):
 
         # Map the tileset index to the corresponding tile image
         yield (first_index + i, image_grid[grid_index])
+
+
+def load_tmx_tile_objects(tileset_node):
+    """Yields a tuple of (type, tileset_index) for tile objects in a tileset.
+
+    Args:
+        tileset_node (:obj:`xml.etree.Element`): Tileset element to use.
+
+    Raises:
+        ValueError if the render order is invalid.
+
+    Yields:
+        A tuple of (type, tileset_index) for each tile object, where the type
+        is a string and the index is an int.
+    """
+    # Get the tile object nodes for this tileset
+    tile_objects = tileset_node.findall('tile')
+
+    if tile_objects:
+        # Get the starting index for the tiles in the set
+        first_index = int(tileset_node.attrib['firstgid'])
+
+        # Add each tile from this image source to the tile map
+        for tile_object in tile_objects:
+            # Obtain the index into the tileset's image
+            tile_object_index = int(tile_object.attrib['id'])
+
+            # Map the type to the corresponding tile index
+            yield (first_index + tile_object_index, tile_object.attrib['type'])

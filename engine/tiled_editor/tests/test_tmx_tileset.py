@@ -1,4 +1,4 @@
-from ..tmx_tileset import load_tmx_tileset
+from ..tmx_tileset import load_tmx_tileset, load_tmx_tile_objects
 from defusedxml import ElementTree
 from io import StringIO
 from unittest.mock import patch
@@ -69,5 +69,26 @@ class TestTmxTileset(unittest.TestCase):
 
         # Load the tileset
         actual = list(load_tmx_tileset('map.tmx', tileset_node))
+
+        self.assertEqual(expected, actual)
+
+    def test_indexes_tile_objects_correctly(self):
+        """Tile objects index into the image grid correctly."""
+        mock_xml = '<tileset firstgid="1" name="a" tilecount="6" columns="2">'
+        mock_xml += '\n\t<tile id="1" type="first" />'
+        mock_xml += '\n\t<tile id="6" type="middle" />'
+        mock_xml += '\n\t<tile id="12" type="last" />'
+        mock_xml += '\n</tileset>'
+        tileset_node = ElementTree.parse(StringIO(mock_xml)).getroot()
+
+        # Right-down order: gid 1 is the bottom left corner of the image grid
+        expected = [
+            (2, 'first'),
+            (7, 'middle'),
+            (13, 'last'),
+        ]
+
+        # Load the tile objects
+        actual = list(load_tmx_tile_objects(tileset_node))
 
         self.assertEqual(expected, actual)
