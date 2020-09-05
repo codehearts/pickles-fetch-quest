@@ -41,7 +41,7 @@ def create_player(key_handler):
 
     # Listeners
     pickle.add_listeners(on_move=pickle_graphics.set_position)
-    pickle.add_listeners(on_collision=pickle_controls.process_collision)
+    pickle.add_listeners(on_collider_enter=pickle_controls.process_collision)
 
     # Player key press handlers
     key_handler.on_key_press(key.LEFT, lambda: pickle_graphics.scale_x(-1))

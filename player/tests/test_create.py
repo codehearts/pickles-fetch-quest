@@ -29,7 +29,7 @@ class TestCreatePlayer(unittest.TestCase):
 
         mock_game_object.return_value.add_listeners.assert_has_calls([
             call(on_move=mock_graphics.return_value.set_position),
-            call(on_collision=mock_controller.return_value.process_collision)])
+            call(on_collider_enter=mock_controller().process_collision)])
 
     @patch('player.create.PlatformerController')
     @patch('engine.graphics.GraphicsObject')
