@@ -22,8 +22,14 @@ class GameObject(geometry.Rectangle, EventDispatcher):
     Events:
         on_move: The x or y coordinates of the object's geometry have changed.
             A tuple of the x and y coordinates will be passed to the listeners.
-        on_collision: The object's geometry overlapped with another object.
+        on_collider_enter: The object's collider has entered a collision with
+            another object. The other object will be passed to the listeners.
+        on_collider_exit: The object's collider has exited a collision with
+            another object. The other object will be passed to the listeners.
+        on_trigger_enter: The object's trigger overlapped with another object.
             The other object will be passed to the listeners.
+        on_trigger_leave: The object's trigger no longer overlaps with the
+            other object. The other object will be passed to the listeners.
     """
 
     def __init__(self, geometry_states, x, y, physics):
@@ -51,7 +57,10 @@ class GameObject(geometry.Rectangle, EventDispatcher):
         super(GameObject, self).__init__(x, y,
                                          geometry_states['default'].width,
                                          geometry_states['default'].height)
-        self.register_event_type('on_collision')
+        self.register_event_type('on_collider_enter')
+        self.register_event_type('on_collider_exit')
+        self.register_event_type('on_trigger_enter')
+        self.register_event_type('on_trigger_exit')
         self.register_event_type('on_move')
 
         self._geometry_states = geometry_states
@@ -68,15 +77,6 @@ class GameObject(geometry.Rectangle, EventDispatcher):
         if self._coordinates != coordinates:
             self._coordinates.set(coordinates)
             self.dispatch_event('on_move', (self.x, self.y))
-
-    def notify_collision_with(self, other):
-        """Dispatches an ``on_collision`` event with the other object.
-
-        Args:
-            other (:obj:`engine.game_object.GameObject`):
-                The object this one overlapped with.
-        """
-        self.dispatch_event('on_collision', other)
 
     def set_geometry_state(self, state_name):
         """Sets the geometry of the object to the state with the given name.

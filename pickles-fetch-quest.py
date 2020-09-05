@@ -1,6 +1,5 @@
-from engine import audio, camera, collision, disk, easing, factory, geometry
-from engine import game_object, graphics, key_handler, physics, room
-from engine import tiled_editor
+from engine import audio, camera, disk, easing, factory, geometry, game_object
+from engine import graphics, key_handler, physics, room, tiled_editor, world
 import pyglet.app
 import pyglet.gl
 import player
@@ -17,7 +16,7 @@ graphics_director = graphics.GraphicsController(
     game_width * game_scale, game_height * game_scale,
     title="Pickle's Fetch Quest")
 key_handler = key_handler.KeyHandler(graphics_director)
-collision_resolver = collision.CollisionResolver2d()
+world = world.World2d()
 
 audio_director.attenuation_distance = 40
 
@@ -27,7 +26,7 @@ collision_sound = audio_director.load(
 (pickle, pickle_graphics) = player.create_player(key_handler)
 
 graphics_director.add_listeners(on_update=pickle.update)
-collision_resolver.register(pickle, collision.RESOLVE_COLLISIONS)
+world.add_collider(pickle)
 
 
 def create_floor_physics(**kwargs):
@@ -41,9 +40,9 @@ def create_floor_physics(**kwargs):
         collision_sound.play()
         # instance.position = (20, 0)
 
-    tile.add_listeners(on_collision=play_collision_audio)
+    tile.add_listeners(on_collider_enter=play_collision_audio)
     graphics_director.add_listeners(on_update=tile.update)
-    collision_resolver.register(tile, collision.RESOLVE_COLLISIONS)
+    world.add_collider(tile)
 
     return tile
 
@@ -75,7 +74,7 @@ camera.follow_easing = easing.LinearInterpolation(0.08)
 
 
 def on_update(dt):
-    collision_resolver.resolve()
+    world.update(dt)
     key_handler.update(dt)
     entry_room.update(dt)
     camera.update(dt)

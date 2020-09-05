@@ -11,7 +11,8 @@ class TmxLayerLoader(object):
         name (str): Name of the layer from the TMX node.
     """
 
-    def __init__(self, layer_node, map_node, tileset, object_factory):
+    def __init__(self, layer_node, map_node, tileset, tile_objects,
+                 object_factory):
         """Loads a :obj:`engine.room.RoomLayer` from a TMX layer node.
 
         Supported TMX layer nodes are "layer" and "objectgroup".
@@ -21,6 +22,8 @@ class TmxLayerLoader(object):
             map_node (:obj:`xml.etree.Element`): TMX map node.
             tileset (dict of int to :obj:`pyglet.image.AbstractImage`):
                 Tileset for the map.
+            tile_objects (dict of int to str):
+                Mapping of tileset indices to tile object types.
             object_factory (:obj:`engine.factory.GenericFactory`):
                 Factory to create objects from names in the TMX layer.
         """
@@ -31,6 +34,7 @@ class TmxLayerLoader(object):
 
         self._layer_node = layer_node
         self._tileset = tileset
+        self._tile_objects = tile_objects
         self._object_factory = object_factory
 
         # Get render order and dimensions of map
@@ -72,14 +76,22 @@ class TmxLayerLoader(object):
         """Creates objects using the factory and adds them to the layer."""
         # Load the objects from this layer
         objects = load_tmx_object_layer(
-            self._map_width_px, self._map_height_px, self._layer_node)
-
-        # Filter out objects the factory can't create
-        filtered_objects = filter(
-            lambda obj: self._object_factory.can_create(obj['name']),
-            objects)
+            self._map_width_px, self._map_height_px,
+            self._layer_node, self._tile_objects)
 
         # Create and add all supported objects to the layer
-        for obj in filtered_objects:
-            self.layer.add_object(
-                self._object_factory.create(**obj, batch=self.layer.batch))
+        for obj in objects:
+            # Don't create objects the factory can't create
+            if self._object_factory.can_create(obj['type']):
+                obj['name'] = obj['type']  # The factory expects a "name"
+                self.layer.add_object(
+                    self._object_factory.create(**obj, batch=self.layer.batch))
+
+            # Draw the tile for tile objects
+            if 'tile' in obj:
+                coordinates = geometry.Point2d(obj['x'], obj['y'])
+                state = {'default': self._tileset[obj['tile']]}
+
+                self.layer.add_object(
+                    graphics.GraphicsObject(
+                        coordinates, state, batch=self.layer.batch))
