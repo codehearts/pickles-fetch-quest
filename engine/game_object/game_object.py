@@ -1,26 +1,21 @@
 from ..event_dispatcher import EventDispatcher
-from engine import geometry
+from engine.geometry import Point2d, Rectangle
 
 
-class GameObject(geometry.Rectangle, EventDispatcher):
+class GameObject(EventDispatcher, Rectangle):
     """Game object with support for event dispatching.
 
     See :cls:`event_dispatcher.EventDispatcher` for usage information on the
     event dispatcher.
 
     Attributes:
-        x (int): The x coordinate of the left edge of the object's geometry.
-        y (int): The y coordinate of the bottom edge of the object's geometry.
-        coordinates (:obj:`engine.geometry.Point2d`):
-            The coordinates for the bottom left edge of the object's geometry.
-            Read-only.
-        width (int): The width of the object's geometry.
-        height (int): The height of the object's geometry.
-        physics (:obj:`engine.physics.Physics2d`):
-            Physics that the object obeys on update.
+        x (int): The x coordinate of the left edge of the object.
+        y (int): The y coordinate of the bottom edge of the object.
+        width (int): The width of the object.
+        height (int): The height of the object.
 
     Events:
-        on_move: The x or y coordinates of the object's geometry have changed.
+        on_move: The x or y coordinates of the object have changed.
             A tuple of the x and y coordinates will be passed to the listeners.
         on_collider_enter: The object's collider has entered a collision with
             another object. The other object will be passed to the listeners.
@@ -32,41 +27,32 @@ class GameObject(geometry.Rectangle, EventDispatcher):
             other object. The other object will be passed to the listeners.
     """
 
-    def __init__(self, geometry_states, x, y, physics):
+    def __init__(self, x, y, width, height, **kwargs):
         """Creates a new event-driven game object.
 
         Args:
-            geometry_states (dict of str to :obj:`engine.geometry.Rectangle`):
-                A mapping of state names to geometry objects. The 'default'
-                state is required or a ``KeyError`` is raised.
-
-                A possible valid ``geometry_states`` value would be::
-
-                    {
-                        'default': geometry.Rectangle(0, 0, 32, 32),
-                        'active': geometry.Rectangle(10, 10, 64, 128)
-                    }
-            x (int): The x coordinate for the game object's bottom edge.
-            y (int): The y coordinate for the game object's left edge.
-            physics (:obj:`engine.physics.Physics2d`):
-                Physics for the object when its `update` method is called.
-
-        Raises:
-            KeyError: If ``geometry_states`` was missing the 'default' state.
+            x (int): The x coordinate of the left edge of the object.
+            y (int): The y coordinate of the bottom edge of the object.
+            width (int): The width of the object.
+            height (int): The height of the object.
         """
-        super(GameObject, self).__init__(x, y,
-                                         geometry_states['default'].width,
-                                         geometry_states['default'].height)
+        super(GameObject, self).__init__(x, y, width, height, **kwargs)
         self.register_event_type('on_collider_enter')
         self.register_event_type('on_collider_exit')
         self.register_event_type('on_trigger_enter')
         self.register_event_type('on_trigger_exit')
         self.register_event_type('on_move')
 
-        self._geometry_states = geometry_states
-        self.physics = physics
 
-        self.set_geometry_state('default')
+
+    def move_by(self, relative_positions):
+        """Moves this object by the given relative x and y positions.
+
+        Args:
+            relative_positions (tuple of int):
+                The amount to increase the x and y coordinates by.
+        """
+        self.set_position(self._coordinates + relative_positions)
 
     def set_position(self, coordinates):
         """Sets the x and y coordinates of the object at the same time.
@@ -78,26 +64,19 @@ class GameObject(geometry.Rectangle, EventDispatcher):
             self._coordinates.set(coordinates)
             self.dispatch_event('on_move', (self.x, self.y))
 
-    def set_geometry_state(self, state_name):
-        """Sets the geometry of the object to the state with the given name.
+            self._coordinates.set(coordinates)
 
-        Args:
-            state_name (str): The name of the geometry state to switch to.
-        """
-        state = self._geometry_states[state_name]
-        self.width = state.width
-        self.height = state.height
+            self.dispatch_event('on_move', (self.x, self.y))
 
     def update(self, ms):
-        """Updates the position and state of the game object based on time.
+        """Updates the game object based on time.
+
+        This is currently a noop.
 
         Args:
             ms (int): Number of milliseconds since the last update.
         """
-        if self.physics is not None:
-            self.physics.run_simulation(ms)
-            self.set_position((self.x + self.physics.velocity.x,
-                               self.y + self.physics.velocity.y))
+        pass
 
     @property
     def coordinates(self):
@@ -105,7 +84,7 @@ class GameObject(geometry.Rectangle, EventDispatcher):
 
         This property is read-only. Use ``set_position`` to set it.
         """
-        return geometry.Point2d(self._coordinates.x, self._coordinates.y)
+        return Point2d(self._coordinates.x, self._coordinates.y)
 
     @property
     def x(self):
