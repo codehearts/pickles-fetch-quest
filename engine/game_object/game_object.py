@@ -46,7 +46,22 @@ class GameObject(EventDispatcher, Rectangle):
         self.register_event_type('on_move_relative')
         self.register_event_type('on_move')
 
+    def attach(self, attachment, offset_coordinates):
+        """Attaches an object to this one, updating its position upon movement.
 
+        The attachment will have its position changed as part of this call.
+
+        Args:
+            attachment (:obj:`geometry.Rectangle`):
+                The object to attach.
+            offset_coordinates (tuple of int):
+                The x and y offset from the bottom left corner of this object.
+        """
+        # Move the attachment into place
+        attachment.set_position(self._coordinates + offset_coordinates)
+
+        # Move the attachment when this object moves
+        self.add_listeners(on_move_relative=attachment.move_by)
 
     def move_by(self, relative_positions):
         """Moves this object by the given relative x and y positions.

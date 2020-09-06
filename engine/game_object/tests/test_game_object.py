@@ -163,7 +163,27 @@ class TestGameObject(unittest.TestCase):
         self.assertEqual(3, self.game_object.width)
         self.assertEqual(4, self.game_object.height)
 
+    def test_attachments_are_repositioned(self):
+        """Objects are repositioned when attached to this one."""
+        attachment = Mock()
+
+        self.game_object.attach(attachment, (10, 20))
+
+        # This object was not repositioned
         self.assertEqual(1, self.game_object.x)
         self.assertEqual(2, self.game_object.y)
         self.assertEqual(3, self.game_object.width)
         self.assertEqual(4, self.game_object.height)
+
+        # The other object was repositioned
+        attachment.set_position.assert_called_once_with((11, 22))
+
+    def test_attachments_listen_for_movement(self):
+        """Attachments are added as listeners for relative movement."""
+        attachment = Mock()
+
+        self.game_object.attach(attachment, (10, 20))
+        attachment.move_by.assert_not_called()
+
+        self.game_object.dispatch_event('on_move_relative', (1, 2))
+        attachment.move_by.assert_called_once_with((1, 2))
