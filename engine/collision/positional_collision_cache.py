@@ -87,7 +87,7 @@ class PositionalCollisionCache(CollisionCache):
 
         # Iterate over the cached and new positions on the x and y axes
         return self._is_repeated_on_axis(key, velocity_delta, 'x') and \
-               self._is_repeated_on_axis(key, velocity_delta, 'y')
+            self._is_repeated_on_axis(key, velocity_delta, 'y')
 
     def _is_repeated_on_axis(self, key, velocity_delta, axis):
         """Checks if a collision between two objects is identical to the last.
