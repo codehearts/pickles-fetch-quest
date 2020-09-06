@@ -16,7 +16,8 @@ graphics_director = graphics.GraphicsController(
     game_width * game_scale, game_height * game_scale,
     title="Pickle's Fetch Quest")
 key_handler = key_handler.KeyHandler(graphics_director)
-world = world.World2d()
+game_world = world.World2d()
+game_world_debugger = world.World2dDebug(game_world)
 
 audio_director.attenuation_distance = 40
 
@@ -26,7 +27,7 @@ collision_sound = audio_director.load(
 (pickle, pickle_graphics) = player.create_player(key_handler)
 
 graphics_director.add_listeners(on_update=pickle.update)
-world.add_collider(pickle)
+game_world.add_collider(pickle)
 
 
 def create_floor_physics(**kwargs):
@@ -42,7 +43,7 @@ def create_floor_physics(**kwargs):
 
     tile.add_listeners(on_collider_enter=play_collision_audio)
     graphics_director.add_listeners(on_update=tile.update)
-    world.add_collider(tile)
+    game_world.add_collider(tile)
 
     return tile
 
@@ -74,7 +75,7 @@ camera.follow_easing = easing.LinearInterpolation(0.08)
 
 
 def on_update(dt):
-    world.update(dt)
+    game_world.update(dt)
     key_handler.update(dt)
     entry_room.update(dt)
     camera.update(dt)
@@ -82,12 +83,12 @@ def on_update(dt):
 
 graphics_director.add_listeners(on_update=on_update)
 
-
 @graphics_director._window.event
 def on_draw():
     graphics_director._window.clear()
     camera.attach()
     entry_room.draw()
+    game_world_debugger.draw()
     camera.detach()
 
 

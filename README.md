@@ -2,7 +2,7 @@
 
 [![Build Status][build-badge]][build-link] [![Coverage][coverage-badge]][coverage-link] [![Maintainability][health-badge]][health-link]
 
-A throwback to the Game Boy era of gaming, inspired by Kirby's Great Cave Offensive and created for GitHub's 2017 Game Off. Help Pickle brave the Wolf Queen's Palace and collect as many of her treasures as you can!
+A throwback to the Game Boy era of gaming, inspired by Kirby's Great Cave Offensive and started for GitHub's 2017 Game Off. Help Pickle brave the Wolf Queen's Palace and collect as many of her treasures as you can!
 
 ## Installing
 
@@ -32,6 +32,9 @@ coverage report -m --skip-covered --include=./* # Report files without 100% cove
 
 ## Dev Log
 
+<img align="left" alt="Pickle's collider is shown as a green outline" src="https://user-images.githubusercontent.com/2885412/92317435-67ee2200-efb5-11ea-8b94-430b1554da3f.gif" width="30%">
+<p align="left" width="60%"><strong>Sept 2020</strong><br>Debug graphics for colliders and triggers were added, showing what the world simulation is really looking at.</p>
+<p> </p>
 <img align="right" alt="Pickle hops around an early rendition of the game's castle" src="https://user-images.githubusercontent.com/2885412/91630544-090e2480-e987-11ea-9b2a-a36d9f2b32a7.gif" width="30%">
 <p align="right" width="60%"><strong>Aug 2020</strong><br>The camera was implemented, allowing Pickle to explore maps created with the Tiled editor.</p>
 <p> </p>

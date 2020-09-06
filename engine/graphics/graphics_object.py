@@ -33,15 +33,15 @@ class GraphicsObject(object):
                     {
                         'default':   idle_image,
                         'activated': activated_image,
-                        'flashing': GraphicsObjects.create_animation(
+                        'flashing': GraphicsObject.create_animation(
                             flashing_image_grid[0:4], 500, loop=True)
                     }
 
         Kwargs:
-            batch (:obj:`pyglet.graphics.Batch`, optional): The batch to render
-                this graphic with. Defaults to None.
-            group (:obj:`pyglet.graphics.Group`, optional): The group to render
-                this graphic within. Defaults to None.
+            batch (:obj:`engine.graphics.GraphicsBatch`, optional):
+                The batch to render this graphic with. Defaults to None.
+            group (:obj:`pyglet.graphics.Group`, optional):
+                The group to render this graphic within. Defaults to None.
 
         Raises:
             KeyError: If ``display_states`` was missing the 'default' state.
