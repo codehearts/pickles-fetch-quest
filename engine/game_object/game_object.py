@@ -17,6 +17,8 @@ class GameObject(EventDispatcher, Rectangle):
     Events:
         on_move: The x or y coordinates of the object have changed.
             A tuple of the x and y coordinates will be passed to the listeners.
+        on_move_relative: The x or y coordinates of the object have changed.
+            A tuple of the x and y deltas will be passed to the listeners.
         on_collider_enter: The object's collider has entered a collision with
             another object. The other object will be passed to the listeners.
         on_collider_exit: The object's collider has exited a collision with
@@ -41,6 +43,7 @@ class GameObject(EventDispatcher, Rectangle):
         self.register_event_type('on_collider_exit')
         self.register_event_type('on_trigger_enter')
         self.register_event_type('on_trigger_exit')
+        self.register_event_type('on_move_relative')
         self.register_event_type('on_move')
 
 
@@ -61,11 +64,12 @@ class GameObject(EventDispatcher, Rectangle):
             coordinates (tuple of int): A tuple of the x and y coordinates.
         """
         if self._coordinates != coordinates:
-            self._coordinates.set(coordinates)
-            self.dispatch_event('on_move', (self.x, self.y))
+            # ``coordinates`` is a tuple, so it must be on the righthand side
+            coordinate_delta = (self._coordinates - coordinates) * -1
 
             self._coordinates.set(coordinates)
 
+            self.dispatch_event('on_move_relative', coordinate_delta)
             self.dispatch_event('on_move', (self.x, self.y))
 
     def update(self, ms):
@@ -93,7 +97,7 @@ class GameObject(EventDispatcher, Rectangle):
 
     @x.setter
     def x(self, value):
-        """Sets the x coordinate of the object and dispatches on_move."""
+        """Set the x coordinate and dispatch on_move and on_move_relative."""
         if self._coordinates.x != value:
             self.set_position((value, self.y))
 
@@ -104,6 +108,6 @@ class GameObject(EventDispatcher, Rectangle):
 
     @y.setter
     def y(self, value):
-        """Sets the y coordinate of the object and dispatches on_move."""
+        """Set the y coordinate and dispatch on_move and on_move_relative."""
         if self._coordinates.y != value:
             self.set_position((self.x, value))
