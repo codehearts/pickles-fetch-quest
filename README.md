@@ -2,7 +2,7 @@
 
 [![Build Status][build-badge]][build-link] [![Coverage][coverage-badge]][coverage-link] [![Maintainability][health-badge]][health-link]
 
-A throwback to the Game Boy era of gaming, inspired by Kirby's Great Cave Offensive and created for GitHub's 2017 Game Off. Help Pickle brave the Wolf Queen's Palace and collect as many of her treasures as you can!
+A throwback to the Game Boy era of gaming, inspired by Kirby's Great Cave Offensive and started for GitHub's 2017 Game Off. Help Pickle brave the Wolf Queen's Palace and collect as many of her treasures as you can!
 
 ## Installing
 
