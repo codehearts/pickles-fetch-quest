@@ -1,10 +1,11 @@
 from engine.collision import CollisionCache, PositionalCollisionCache
 from engine.collision import resolve_game_object_collision
+from engine.event_dispatcher import EventDispatcher
 from engine.geometry import detect_overlap_2d
 from .world_object import WorldObject, COLLIDER, TRIGGER
 
 
-class World2d(object):
+class World2d(EventDispatcher):
     """Detects overlap and resolves collisions between game objects.
 
     This is implemented as a sweep-and-prune algorithm over all registered
@@ -15,6 +16,16 @@ class World2d(object):
     * Colliders: Resolves collisions between two colliders using  the
         :mod:`collision` module. An on_collision event is dispatched to botch
         objects upon resolution.
+
+    Events:
+        on_update_enter: A world update has just begun.
+            The world will be passed to the listeners.
+        on_update_exit: A world update has just completed.
+            The world will be passed to the listeners.
+        on_collider_add: A collider was added to the world.
+            The collider will be passed to the listeners.
+        on_trigger_add: A trigger was added to the world.
+            The trigger will be passed to the listeners.
     """
 
     def __init__(self):
@@ -24,6 +35,11 @@ class World2d(object):
         self._triggers = CollisionCache()
         self._objects = []
 
+        self.register_event_type('on_update_enter')
+        self.register_event_type('on_update_exit')
+        self.register_event_type('on_collider_add')
+        self.register_event_type('on_trigger_add')
+
     def add_collider(self, physical_object):
         """Adds a game object to be treated as a collider.
 
@@ -32,6 +48,7 @@ class World2d(object):
                 The game object to resolve collisions against.
         """
         self._objects.append(WorldObject(physical_object, COLLIDER))
+        self.dispatch_event('on_collider_add', physical_object)
 
     def add_trigger(self, physical_object):
         """Adds a game object to be treated as a trigger area.
@@ -41,6 +58,7 @@ class World2d(object):
                 The game object to detect collisions with.
         """
         self._objects.append(WorldObject(physical_object, TRIGGER))
+        self.dispatch_event('on_trigger_add', physical_object)
 
     def update(self, ms):
         """Updates the state of the world by processing object collisions.
@@ -48,6 +66,8 @@ class World2d(object):
         Args:
             ms (int): The time since last update, in milliseconds.
         """
+        self.dispatch_event('on_update_enter', self)
+
         # Sort objects by their x coordinate
         self._objects.sort(key=lambda world_object: world_object.object.x)
 
@@ -72,6 +92,8 @@ class World2d(object):
             'on_trigger_enter', self._triggers.get_new_collisions())
         self._dispatch(
             'on_trigger_exit', self._triggers.get_removed_collisions())
+
+        self.dispatch_event('on_update_exit', self)
 
     def _narrow_phase(self, first, second):
         """Detects and processes a collision between two game objects.

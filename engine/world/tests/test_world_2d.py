@@ -9,6 +9,69 @@ class TestWorld2d(unittest.TestCase):
     module = 'engine.world.world_2d'
     resolve_game_object_collision_fn = module+'.resolve_game_object_collision'
 
+    def test_adding_trigger_dispatches_event(self):
+        """An on_trigger_add event is dispatched when a trigger is added."""
+        trigger = Mock(x=1, width=2, y=2, height=2)
+        listener = Mock()
+
+        world = World2d()
+        world.add_listeners(on_trigger_add=listener)
+        world.add_trigger(trigger)
+
+        listener.assert_called_once_with(trigger)
+
+    def test_adding_collider_dispatches_event(self):
+        """An on_collider_add event is dispatched when a collider is added."""
+        collider = Mock(x=1, width=2, y=2, height=2)
+        listener = Mock()
+
+        world = World2d()
+        world.add_listeners(on_collider_add=listener)
+        world.add_collider(collider)
+
+        listener.assert_called_once_with(collider)
+
+    @patch('engine.world.world_2d.PositionalCollisionCache')
+    @patch('engine.world.world_2d.CollisionCache')
+    @patch('engine.world.world_2d.detect_overlap_2d')
+    def test_update_start_fires_event(self, detect_mock, *args):
+        """An on_update_enter event is dispatched when an update starts."""
+        a = Mock(name='a', x=1, width=2, y=2, height=2)
+        b = Mock(name='b', x=1, width=2, y=2, height=2)
+
+        # The listener will check that resolution has not been attempted
+        listener = Mock(side_effect=lambda w: detect_mock.assert_not_called())
+
+        world = World2d()
+        world.add_trigger(a)
+        world.add_trigger(b)
+        world.add_listeners(on_update_enter=listener)
+
+        world.update(1)
+
+        listener.assert_called_once_with(world)
+
+    @patch('engine.world.world_2d.PositionalCollisionCache')
+    @patch('engine.world.world_2d.CollisionCache')
+    @patch('engine.world.world_2d.detect_overlap_2d')
+    def test_update_end_fires_event(self, detect_mock, *args):
+        """An on_update_exit event is dispatched when an update ends."""
+        a = Mock(name='a', x=1, width=2, y=2, height=2)
+        b = Mock(name='b', x=1, width=2, y=2, height=2)
+
+        # The listener will check that resolution was attempted
+        listener = Mock(
+            side_effect=lambda w: detect_mock.assert_called_once_with(a, b))
+
+        world = World2d()
+        world.add_trigger(a)
+        world.add_trigger(b)
+        world.add_listeners(on_update_exit=listener)
+
+        world.update(1)
+
+        listener.assert_called_once_with(world)
+
     @patch(resolve_game_object_collision_fn)
     @patch('engine.world.world_2d.PositionalCollisionCache')
     def test_3_nonoverlapping_colliders(self, CacheMock, resolve_mock):
