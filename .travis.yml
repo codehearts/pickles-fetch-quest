@@ -1,9 +1,10 @@
 language: python
 cache: pip
 python:
-  - 3.6.3
+  - 3.8.5
 env:
   PYGLET_SHADOW_WINDOW: 'False'
+  PYGLET_DEBUG_GL: 'False'
   PYGLET_AUDIO: 'silent'
 addons:
   apt:
