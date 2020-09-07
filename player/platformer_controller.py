@@ -12,7 +12,7 @@ class PlatformerController(object):
         """Creates a side-scrolling platformer controller for a character.
 
         Args:
-            character (:obj:`engine.game_object.GameObject`):
+            character (:obj:`engine.game_object.PhysicalGameObject`):
                 The character to control.
             walk_acceleration (int): The walking acceleration of the character.
             jump_height (int): The minimum height of a full jump. Full jumps
@@ -34,7 +34,7 @@ class PlatformerController(object):
     @property
     def is_airborne(self):
         """Determines whether the character is airborne."""
-        return self._character.physics.velocity.y != 0 or not self._is_grounded
+        return self._character.velocity.y != 0 or not self._is_grounded
 
     @property
     def is_jumping(self):
@@ -64,7 +64,7 @@ class PlatformerController(object):
 
             impulse = self._jump_height * dampening // pow(self._jump_time, 3)
 
-            self._character.physics.velocity.y = impulse
+            self._character.velocity.y = impulse
             self._elapsed_jump_time += dt
 
     def cancel_jump(self, *args):
@@ -72,8 +72,8 @@ class PlatformerController(object):
 
         Recommended as a key release handler.
         """
-        if self._character.physics.velocity.y > 0:
-            self._character.physics.velocity.y = 0
+        if self._character.velocity.y > 0:
+            self._character.velocity.y = 0
         self._is_jumping = False
 
     def walk_left(self, *args):
@@ -81,21 +81,21 @@ class PlatformerController(object):
 
         Recommended as a key down handler.
         """
-        self._character.physics.acceleration.x = -self._walk_acceleration
+        self._character.acceleration.x = -self._walk_acceleration
 
     def walk_right(self, *args):
         """Accelerates the character right using their walking acceleration.
 
         Recommended as a key down handler.
         """
-        self._character.physics.acceleration.x = self._walk_acceleration
+        self._character.acceleration.x = self._walk_acceleration
 
     def stop_walking(self, *args):
         """Stops the character's horizontal acceleration.
 
         Recommended as a key release handler.
         """
-        self._character.physics.acceleration.x = 0
+        self._character.acceleration.x = 0
 
     def process_collision(self, other):
         # Check if the character was resolved on top of the other object

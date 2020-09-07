@@ -30,8 +30,8 @@ class TestPlatformerController(unittest.TestCase):
         """A controller is jumping when the `jump` method is called."""
         # Start from rest after colliding with ground
         self.controller.process_collision(Mock(y=-1, height=1))
-        self.mock_character.physics.acceleration.y = 0
-        self.mock_character.physics.velocity.y = 0
+        self.mock_character.acceleration.y = 0
+        self.mock_character.velocity.y = 0
 
         self.controller.jump(15)
         self.assertTrue(self.controller.is_jumping)
@@ -40,8 +40,8 @@ class TestPlatformerController(unittest.TestCase):
         """A controller is no longer jumping when a jump is cancelled."""
         # Start from rest after colliding with ground
         self.controller.process_collision(Mock(y=-1, height=1))
-        self.mock_character.physics.acceleration.y = 0
-        self.mock_character.physics.velocity.y = 0
+        self.mock_character.acceleration.y = 0
+        self.mock_character.velocity.y = 0
 
         self.controller.jump(15)
         self.controller.cancel_jump()
@@ -51,8 +51,8 @@ class TestPlatformerController(unittest.TestCase):
         """The velocity of a jump decreases the more `jump` is called."""
         # Start from rest after colliding with ground
         self.controller.process_collision(Mock(y=-1, height=1))
-        self.mock_character.physics.acceleration.y = 0
-        self.mock_character.physics.velocity.y = 0
+        self.mock_character.acceleration.y = 0
+        self.mock_character.velocity.y = 0
 
         impulses = []
 
@@ -60,7 +60,7 @@ class TestPlatformerController(unittest.TestCase):
         for i in range(3):
             self.controller.jump(self.jump_time // 3)
             self.mock_character.y += 1
-            impulses.append(self.mock_character.physics.velocity.y)
+            impulses.append(self.mock_character.velocity.y)
 
         # Acceleration should decrease
         self.assertLess(impulses[-1], impulses[-2])
@@ -70,25 +70,25 @@ class TestPlatformerController(unittest.TestCase):
         """The jump impulse is removed once the jump time has elapsed."""
         # Start from rest after colliding with ground
         self.controller.process_collision(Mock(y=-1, height=1))
-        self.mock_character.physics.acceleration.y = 0
-        self.mock_character.physics.velocity.y = 0
+        self.mock_character.acceleration.y = 0
+        self.mock_character.velocity.y = 0
 
         self.controller.jump(0)
 
         # Just before the end of the jump, impulse should be applied
         self.controller.jump(self.jump_time - 1)
-        self.assertGreater(self.mock_character.physics.velocity.y, 0)
+        self.assertGreater(self.mock_character.velocity.y, 0)
 
         # At jump height, impulse should be removed
         self.controller.jump(1)
-        self.assertEqual(0, self.mock_character.physics.velocity.y)
+        self.assertEqual(0, self.mock_character.velocity.y)
 
     def test_controller_is_airborne_at_apex_of_jump_after_cancel(self):
         """Character remains airborne after cancelling a jump at the apex."""
         # Start from rest after colliding with ground
         self.controller.process_collision(Mock(y=-1, height=1))
-        self.mock_character.physics.acceleration.y = 0
-        self.mock_character.physics.velocity.y = 0
+        self.mock_character.acceleration.y = 0
+        self.mock_character.velocity.y = 0
 
         # Jump to full height
         self.controller.jump(self.jump_time)
@@ -102,21 +102,21 @@ class TestPlatformerController(unittest.TestCase):
         """A controller is not airborne when the character is at rest."""
         # Start from rest after colliding with ground
         self.controller.process_collision(Mock(y=-1, height=1))
-        self.mock_character.physics.velocity.y = 0
+        self.mock_character.velocity.y = 0
         self.assertFalse(self.controller.is_airborne)
 
     def test_controller_is_airborne_when_moving_up(self):
         """A controller is airborne when the character is moving upwards."""
         # Start with initial velocity after colliding with ground
         self.controller.process_collision(Mock(y=-1, height=1))
-        self.mock_character.physics.velocity.y = 1
+        self.mock_character.velocity.y = 1
         self.assertTrue(self.controller.is_airborne)
 
     def test_controller_is_airborne_when_moving_down(self):
         """A controller is airborne when the character is moving downwards."""
         # Start with initial velocity after colliding with ground
         self.controller.process_collision(Mock(y=-1, height=1))
-        self.mock_character.physics.velocity.y = -1
+        self.mock_character.velocity.y = -1
         self.assertTrue(self.controller.is_airborne)
 
     def test_walking_right_applies_positive_walk_acceleration(self):
@@ -124,17 +124,17 @@ class TestPlatformerController(unittest.TestCase):
         self.controller.walk_right()
         self.assertEqual(
             self.walk_acceleration,
-            self.mock_character.physics.acceleration.x)
+            self.mock_character.acceleration.x)
 
     def test_walking_left_applies_negative_walk_acceleration(self):
         """Walking left applies negative walking acceleration."""
         self.controller.walk_left()
         self.assertEqual(
             -self.walk_acceleration,
-            self.mock_character.physics.acceleration.x)
+            self.mock_character.acceleration.x)
 
     def test_stopping_a_walk_removes_horizontal_acceleration(self):
         """Stopping a walking removes horizontal acceleration."""
         self.controller.walk_left()
         self.controller.stop_walking()
-        self.assertEqual(0, self.mock_character.physics.acceleration.x)
+        self.assertEqual(0, self.mock_character.acceleration.x)
