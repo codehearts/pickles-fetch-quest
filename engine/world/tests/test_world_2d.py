@@ -7,7 +7,7 @@ class TestWorld2d(unittest.TestCase):
     """Test functionality of the ``World2d`` class."""
 
     module = 'engine.world.world_2d'
-    resolve_game_object_collision_fn = module+'.resolve_game_object_collision'
+    resolve_physical_collision_fn = module+'.resolve_physical_collision'
 
     def test_adding_trigger_dispatches_event(self):
         """An on_trigger_add event is dispatched when a trigger is added."""
@@ -72,7 +72,7 @@ class TestWorld2d(unittest.TestCase):
 
         listener.assert_called_once_with(world)
 
-    @patch(resolve_game_object_collision_fn)
+    @patch(resolve_physical_collision_fn)
     @patch('engine.world.world_2d.PositionalCollisionCache')
     def test_3_nonoverlapping_colliders(self, CacheMock, resolve_mock):
         """Resolving 3 non-overlapping colliders performs no resolution."""
@@ -94,7 +94,7 @@ class TestWorld2d(unittest.TestCase):
         resolve_mock.assert_not_called()
         CacheMock().add_collision.assert_not_called()
 
-    @patch(resolve_game_object_collision_fn)
+    @patch(resolve_physical_collision_fn)
     @patch('engine.world.world_2d.PositionalCollisionCache')
     def test_3_stacked_overlapping_colliders(self, CacheMock, resolve_mock):
         """Resolving 3 stacked overlapping colliders resolves each pair."""
@@ -126,7 +126,7 @@ class TestWorld2d(unittest.TestCase):
             call(b, c, resolve_mock.return_value),
         ])
 
-    @patch(resolve_game_object_collision_fn)
+    @patch(resolve_physical_collision_fn)
     @patch('engine.world.world_2d.PositionalCollisionCache')
     def test_3_staggered_overlapping_colliders(self, CacheMock, resolve_mock):
         """Resolving staggered overlapping colliders resolves overlaps."""
@@ -243,7 +243,7 @@ class TestWorld2d(unittest.TestCase):
         self.assertEqual(2, CacheMock().add_collision.call_count)
         CacheMock().add_collision.assert_has_calls([call(a, b), call(b, c)])
 
-    @patch(resolve_game_object_collision_fn)
+    @patch(resolve_physical_collision_fn)
     @patch('engine.world.world_2d.PositionalCollisionCache')
     @patch('engine.world.world_2d.detect_overlap_2d')
     @patch('engine.world.world_2d.CollisionCache')
@@ -271,7 +271,7 @@ class TestWorld2d(unittest.TestCase):
         detect_mock.assert_called_once_with(a, b)
         CacheMock().add_collision.assert_called_once_with(a, b)
 
-    @patch(resolve_game_object_collision_fn)
+    @patch(resolve_physical_collision_fn)
     @patch('engine.world.world_2d.PositionalCollisionCache')
     @patch('engine.world.world_2d.detect_overlap_2d')
     @patch('engine.world.world_2d.CollisionCache')
@@ -300,7 +300,7 @@ class TestWorld2d(unittest.TestCase):
         detect_mock.assert_called_once_with(a, b)
         CacheMock().add_collision.assert_called_once_with(a, b)
 
-    @patch(resolve_game_object_collision_fn)
+    @patch(resolve_physical_collision_fn)
     @patch('engine.world.world_2d.PositionalCollisionCache')
     def test_colliders_dispatch_event_on_enter(self, CacheMock, resolve_mock):
         """New collider collisions dispatch an event."""
@@ -317,7 +317,7 @@ class TestWorld2d(unittest.TestCase):
         a.dispatch_event.assert_called_once_with('on_collider_enter', b)
         b.dispatch_event.assert_called_once_with('on_collider_enter', a)
 
-    @patch(resolve_game_object_collision_fn)
+    @patch(resolve_physical_collision_fn)
     @patch('engine.world.world_2d.PositionalCollisionCache')
     def test_colliders_dispatch_event_on_exit(self, CacheMock, resolve_mock):
         """Removed collider collisions dispatch an event."""

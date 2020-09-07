@@ -2,7 +2,7 @@ from .collision_resolution_1d import get_nonoverlapping_coordinate_1d
 from engine import geometry
 
 
-def resolve_game_object_collision(first, second):
+def resolve_physical_collision(first, second):
     """Resolves a collision between two physical objects by repositioning one.
 
     Objects with the lowest velocity on a given axis will be repositioned

@@ -1,5 +1,5 @@
 from engine.collision import CollisionCache, PositionalCollisionCache
-from engine.collision import resolve_game_object_collision
+from engine.collision import resolve_physical_collision
 from engine.event_dispatcher import EventDispatcher
 from engine.geometry import detect_overlap_2d
 from .world_object import WorldObject, COLLIDER, TRIGGER
@@ -126,7 +126,7 @@ class World2d(EventDispatcher):
             second (:obj:`game_object.GameObject`):
                 The second collider in the collision.
         """
-        velocity_delta = resolve_game_object_collision(first, second)
+        velocity_delta = resolve_physical_collision(first, second)
         self._colliders.add_collision(first, second, velocity_delta)
 
     def _resolve_triggers(self, first, second):

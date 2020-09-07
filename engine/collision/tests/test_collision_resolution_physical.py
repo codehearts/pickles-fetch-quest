@@ -1,14 +1,14 @@
-from ..collision_resolution_game_object import resolve_game_object_collision
-from ..collision_resolution_game_object import resolve_game_object_x_collision
-from ..collision_resolution_game_object import resolve_game_object_y_collision
+from ..collision_resolution_physical import resolve_physical_collision
+from ..collision_resolution_physical import resolve_game_object_x_collision
+from ..collision_resolution_physical import resolve_game_object_y_collision
 from unittest.mock import Mock, patch
 import unittest
 
 
-class TestResolveGameObjectCollision(unittest.TestCase):
-    """Test functionality of resolve_game_object_collision function."""
+class TestResolvePhysicalCollision(unittest.TestCase):
+    """Test functionality of resolve_physical_collision function."""
 
-    collision_2d_module = 'engine.collision.collision_resolution_game_object'
+    collision_2d_module = 'engine.collision.collision_resolution_physical'
 
     @patch(collision_2d_module + '.resolve_game_object_y_collision')
     @patch(collision_2d_module + '.resolve_game_object_x_collision')
@@ -19,7 +19,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
         second = Mock(velocity=Mock())
 
         mock_2d_detect.return_value = False
-        self.assertEqual((0, 0), resolve_game_object_collision(first, second))
+        self.assertEqual((0, 0), resolve_physical_collision(first, second))
 
         mock_2d_detect.assert_called_once_with(first, second)
         mock_x_resolve.assert_not_called()
@@ -41,7 +41,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
         mock_2d_detect.return_value = True
         mock_x_resolve.return_value = 1
         mock_y_resolve.return_value = 2
-        self.assertEqual((1, 2), resolve_game_object_collision(first, second))
+        self.assertEqual((1, 2), resolve_physical_collision(first, second))
 
         mock_2d_detect.assert_called_once()
         mock_x_resolve.assert_called_once_with(first, second)
@@ -64,7 +64,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
         mock_2d_detect.return_value = True
         mock_x_resolve.return_value = 1
         mock_y_resolve.return_value = 2
-        self.assertEqual((1, 2), resolve_game_object_collision(first, second))
+        self.assertEqual((1, 2), resolve_physical_collision(first, second))
 
         mock_2d_detect.assert_called_once()
         mock_x_resolve.assert_called_once_with(first, second)
@@ -87,7 +87,7 @@ class TestResolveGameObjectCollision(unittest.TestCase):
         mock_2d_detect.return_value = True
         mock_x_resolve.return_value = 1
         mock_y_resolve.return_value = 2
-        self.assertEqual((1, 2), resolve_game_object_collision(first, second))
+        self.assertEqual((1, 2), resolve_physical_collision(first, second))
 
         mock_2d_detect.assert_called_once()
         mock_x_resolve.assert_called_once_with(second, first)
