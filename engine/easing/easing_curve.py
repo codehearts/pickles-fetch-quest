@@ -22,7 +22,7 @@ class EasingCurve(object):
         Returns:
             An int representing the easing curve's value at the current time.
         """
-        pass
+        return self._value
 
     def update(self, ms):
         """Updates the easing curve to reflect the current position in time.

@@ -81,10 +81,6 @@ class PositionalCollisionCache(CollisionCache):
         """
         key = self._get_cache_key(first, second)
 
-        # A collision between these objects is not cached, this must be new
-        if key not in self._positional_collision_cache:
-            return False
-
         # Iterate over the cached and new positions on the x and y axes
         return self._is_repeated_on_axis(key, velocity_delta, 'x') and \
             self._is_repeated_on_axis(key, velocity_delta, 'y')

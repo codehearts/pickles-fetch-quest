@@ -121,6 +121,40 @@ class TestTmxLoader(unittest.TestCase):
             MockLayerLoader().layer, tmx_loader.layers.get_layer('test'))
 
     @patch('engine.tiled_editor.tmx_loader.load_tmx_tileset')
+    @patch('engine.tiled_editor.tmx_loader.load_tmx_tile_objects')
+    @patch('engine.tiled_editor.tmx_loader.TmxLayerLoader')
+    @patch('engine.disk.DiskLoader')
+    def test_tile_objects_are_loaded(self, MockDiskLoader, MockLayerLoader,
+                                     mock_load_tile_objects,
+                                     mock_load_tileset):
+        """Tile objects are loaded using the layer loader."""
+        mock_xml = '<map version="1.2" orientation="orthogonal" infinite="0" '
+        mock_xml += 'tilewidth="10" tileheight="10" width="1" height="2">\n'
+        mock_xml += '\t<tileset/>\n'
+        mock_xml += '\t<objectgroup/>\n'
+        mock_xml += '</map>\n'
+        mock_root_node = ElementTree.parse(StringIO(mock_xml)).getroot()
+        mock_layer_node = mock_root_node.find('objectgroup')
+
+        MockDiskLoader.load_xml.return_value = mock_root_node
+        mock_factory = Mock()
+
+        mock_load_tile_objects.return_value = [(1, 'a'), (2, 'b')]
+
+        # Create a TMX loader with a mock object factory
+        TmxLoader('map.tmx', mock_factory)
+
+        expected_tile_objects = {
+            1: 'a',
+            2: 'b',
+        }
+
+        # Object layer node was loaded
+        MockLayerLoader.assert_called_once_with(
+            mock_layer_node, mock_root_node, {},
+            expected_tile_objects, mock_factory)
+
+    @patch('engine.tiled_editor.tmx_loader.load_tmx_tileset')
     @patch('engine.tiled_editor.tmx_loader.TmxLayerLoader')
     @patch('engine.disk.DiskLoader')
     def test_layer_collection_has_map_dimensions(self, MockDiskLoader,
