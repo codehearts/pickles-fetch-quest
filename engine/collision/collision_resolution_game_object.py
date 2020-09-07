@@ -3,16 +3,16 @@ from engine import geometry
 
 
 def resolve_game_object_collision(first, second):
-    """Resolves a collision between two game objects by repositioning one.
+    """Resolves a collision between two physical objects by repositioning one.
 
     Objects with the lowest velocity on a given axis will be repositioned
     along that axis to resolve the collision.
 
     Args:
-        first (:obj:`engine.game_object.GameObject`):
-            The first game object in the collision.
-        second (:obj:`engine.game_object.GameObject`):
-            The second game object in the collision.
+        first (:obj:`engine.game_object.PhysicalGameObject`):
+            The first physical game object in the collision.
+        second (:obj:`engine.game_object.PhysicalGameObject`):
+            The second physical game object in the collision.
 
     Returns:
         A tuple of ints for the change in velocity along each axis.
@@ -22,7 +22,7 @@ def resolve_game_object_collision(first, second):
         return (0, 0)
 
     # Move the lighter object, leave the heavier object resting
-    first_is_heavier = first.physics.mass > second.physics.mass
+    first_is_heavier = first.mass > second.mass
     moving, resting = (second, first) if first_is_heavier else (first, second)
 
     x_delta = resolve_game_object_x_collision(moving, resting)
@@ -35,16 +35,16 @@ def resolve_game_object_x_collision(moving, static):
     """Resolves a collision by moving an object along the x axis.
 
     Args:
-        moving (:obj:`engine.game_object.GameObject`):
+        moving (:obj:`engine.game_object.PhysicalGameObject`):
             The object to move along the x axis.
-        static (:obj:`engine.game_object.GameObject`):
+        static (:obj:`engine.game_object.PhysicalGameObject`):
             The object to leave as-is.
 
     Returns:
         The change in the velocity of the object along the x axis.
     """
     # Detect overlap before applying velocity along y axis, but after x axis
-    previous_y = moving.y - moving.physics.velocity.y
+    previous_y = moving.y - moving.velocity.y
     has_overlap = geometry.detect_overlap_1d(
         previous_y, moving.height, static.y, static.height)
 
@@ -58,9 +58,9 @@ def resolve_game_object_y_collision(moving, static):
     """Resolves a collision by moving an object along the y axis.
 
     Args:
-        moving (:obj:`engine.game_object.GameObject`):
+        moving (:obj:`engine.game_object.PhysicalGameObject`):
             The object to move along the y axis.
-        static (:obj:`engine.game_object.GameObject`):
+        static (:obj:`engine.game_object.PhysicalGameObject`):
             The object to leave as-is.
 
     Returns:
@@ -79,9 +79,9 @@ def _resolve_game_object_axis_collision(moving, static, axis):
     """Resolves a collision by moving an object along the specified axis.
 
     Args:
-        moving (:obj:`engine.game_object.GameObject`):
+        moving (:obj:`engine.game_object.PhysicalGameObject`):
             The object to move along the axis.
-        static (:obj:`engine.game_object.GameObject`):
+        static (:obj:`engine.game_object.PhysicalGameObject`):
             The object to leave as-is.
         axis (str): Either 'x' or 'y'.
 
@@ -92,7 +92,7 @@ def _resolve_game_object_axis_collision(moving, static, axis):
     static_length = static.width if axis == 'x' else static.height
 
     original_moving_position = getattr(moving, axis)
-    original_velocity = getattr(moving.physics.velocity, axis)
+    original_velocity = getattr(moving.velocity, axis)
 
     # Get a new coordinate for the moving object to resolve the collision
     resolved_coordinate = get_nonoverlapping_coordinate_1d(
@@ -104,8 +104,8 @@ def _resolve_game_object_axis_collision(moving, static, axis):
 
     # Cancel velocity/acceleration and update coordinate of moving object
     if abs(resolved_coordinate - original_moving_position) != 0:
-        setattr(moving.physics.acceleration, axis, 0)
-        setattr(moving.physics.velocity, axis, 0)
+        setattr(moving.acceleration, axis, 0)
+        setattr(moving.velocity, axis, 0)
         setattr(moving, axis, resolved_coordinate)
 
-    return abs(original_velocity - getattr(moving.physics.velocity, axis))
+    return abs(original_velocity - getattr(moving.velocity, axis))
