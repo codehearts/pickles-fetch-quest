@@ -1,6 +1,8 @@
 from .tmx_object_layer import load_tmx_object_layer
 from .tmx_tile_layer import load_tmx_tile_layer
-from engine import geometry, graphics, room
+from engine.geometry import Point2d
+from engine.graphics import GraphicsBatch, GraphicsObject
+from engine.room import RoomLayer
 
 
 class TmxLayerLoader(object):
@@ -29,7 +31,7 @@ class TmxLayerLoader(object):
         """
         super(TmxLayerLoader, self).__init__()
 
-        self.layer = room.RoomLayer(batch=graphics.GraphicsBatch())
+        self.layer = RoomLayer(batch=GraphicsBatch())
         self.name = layer_node.attrib['name']
 
         self._layer_node = layer_node
@@ -64,13 +66,8 @@ class TmxLayerLoader(object):
 
         for tile_spec in filtered_tiles:
             x, y, tileset_index = tile_spec
-
-            coordinates = geometry.Point2d(x, y) * self._tile_size
-            state = {'default': self._tileset[tileset_index]}
-
-            self.layer.add_object(
-                graphics.GraphicsObject(
-                    coordinates, state, batch=self.layer.batch))
+            self._create_graphic_on_layer(
+                self._tileset[tileset_index], Point2d(x, y) * self._tile_size)
 
     def _load_object_layer(self):
         """Creates objects using the factory and adds them to the layer."""
@@ -79,19 +76,30 @@ class TmxLayerLoader(object):
             self._map_width_px, self._map_height_px,
             self._layer_node, self._tile_objects)
 
+        # Filter out tiles not in the factory
+        filtered_objects = filter(
+            lambda obj: self._object_factory.can_create(obj['type']),
+            objects)
+
         # Create and add all supported objects to the layer
-        for obj in objects:
-            # Don't create objects the factory can't create
-            if self._object_factory.can_create(obj['type']):
-                obj['name'] = obj['type']  # The factory expects a "name"
-                self.layer.add_object(
-                    self._object_factory.create(**obj, batch=self.layer.batch))
+        for obj in filtered_objects:
+            obj['name'] = obj['type']  # The factory expects a "name"
+
+            created_object = self._object_factory.create(
+                **obj, batch=self.layer.batch)
+
+            self.layer.add_object(created_object)
 
             # Draw the tile for tile objects
-            if 'tile' in obj:
-                coordinates = geometry.Point2d(obj['x'], obj['y'])
-                state = {'default': self._tileset[obj['tile']]}
+            if 'tile' in obj:  # Only tile objects have a "tile" property
+                graphic = self._create_graphic_on_layer(
+                    self._tileset[obj['tile']], Point2d(obj['x'], obj['y']))
 
-                self.layer.add_object(
-                    graphics.GraphicsObject(
-                        coordinates, state, batch=self.layer.batch))
+                created_object.attach(graphic, (0, 0))
+
+    def _create_graphic_on_layer(self, texture, coordinates):
+        """Creates a graphic and adds it to the layer before returning it."""
+        graphic = GraphicsObject(texture, coordinates, batch=self.layer.batch)
+
+        self.layer.add_object(graphic)
+        return graphic

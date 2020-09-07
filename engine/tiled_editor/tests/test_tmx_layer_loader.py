@@ -9,8 +9,8 @@ class TestTmxLayer(unittest.TestCase):
     """Test loading TMX layers."""
 
     @patch('engine.tiled_editor.tmx_layer_loader.load_tmx_tile_layer')
-    @patch('engine.graphics.GraphicsObject')
-    @patch('engine.room.RoomLayer')
+    @patch('engine.tiled_editor.tmx_layer_loader.GraphicsObject')
+    @patch('engine.tiled_editor.tmx_layer_loader.RoomLayer')
     def test_graphics_are_created_for_tile_layers(self, MockLayer,
                                                   MockGraphics,
                                                   mock_load_tile_layer):
@@ -38,12 +38,8 @@ class TestTmxLayer(unittest.TestCase):
         # Graphics were created for each tile within the tileset
         # Positions are in pixels rather than tiles
         MockGraphics.assert_has_calls([
-            call((2, 4),
-                 {'default': mock_tileset[0]},
-                 batch=MockLayer().batch),
-            call((6, 8),
-                 {'default': mock_tileset[1]},
-                 batch=MockLayer().batch)])
+            call(mock_tileset[0], (2, 4), batch=MockLayer().batch),
+            call(mock_tileset[1], (6, 8), batch=MockLayer().batch)])
 
         # Layer had both graphics added to it
         MockLayer().add_object.assert_has_calls([
@@ -54,8 +50,8 @@ class TestTmxLayer(unittest.TestCase):
         self.assertEqual(MockLayer(), loader.layer)
 
     @patch('engine.tiled_editor.tmx_layer_loader.load_tmx_object_layer')
-    @patch('engine.graphics.GraphicsObject')
-    @patch('engine.room.RoomLayer')
+    @patch('engine.tiled_editor.tmx_layer_loader.GraphicsObject')
+    @patch('engine.tiled_editor.tmx_layer_loader.RoomLayer')
     def test_objects_are_created_for_obj_layers(self, MockLayer, MockGraphics,
                                                 mock_load_object_layer):
         """Objects are created when loading object layers."""
@@ -101,8 +97,8 @@ class TestTmxLayer(unittest.TestCase):
         self.assertEqual(MockLayer(), loader.layer)
 
     @patch('engine.tiled_editor.tmx_layer_loader.load_tmx_object_layer')
-    @patch('engine.graphics.GraphicsObject')
-    @patch('engine.room.RoomLayer')
+    @patch('engine.tiled_editor.tmx_layer_loader.GraphicsObject')
+    @patch('engine.tiled_editor.tmx_layer_loader.RoomLayer')
     def test_object_layer_tiles_have_graphics_created(self, MockLayer,
                                                       MockGraphics,
                                                       mock_load_object_layer):
@@ -142,20 +138,14 @@ class TestTmxLayer(unittest.TestCase):
         mock_factory.create.assert_called_once_with(
             **mock_load_object_layer()[0], batch=MockLayer().batch)
 
-        # Graphics were created for each tile object within the tileset
+        # Graphics were created for 'a', but not 'b' because it wasn't created
         # Positions are in pixels rather than tiles
-        MockGraphics.assert_has_calls([
-            call((0, 1),
-                 {'default': mock_tileset[1]},
-                 batch=MockLayer().batch),
-            call((4, 5),
-                 {'default': mock_tileset[2]},
-                 batch=MockLayer().batch)])
+        MockGraphics.assert_called_once_with(
+            mock_tileset[1], (0, 1), batch=MockLayer().batch)
 
-        # Layer had both objects and graphics added to it
+        # Layer had all objects and graphics added to it
         MockLayer().add_object.assert_has_calls([
             call(mock_factory.create.return_value),
-            call(MockGraphics()),
             call(MockGraphics())])
 
         self.assertEqual('test', loader.name)
