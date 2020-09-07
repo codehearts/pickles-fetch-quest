@@ -35,3 +35,23 @@ class TestRectangle(unittest.TestCase):
         self.assertEqual(20, rect.y)
         self.assertEqual(10, rect.coordinates.x)
         self.assertEqual(20, rect.coordinates.y)
+
+    def test_rectangle_can_be_positioned_using_coordinates(self):
+        """A Rectangle can be positioned with a single set of coordinates."""
+        rect = Rectangle(1, 2, 3, 4)
+        rect.set_position((10, 20))
+
+        self.assertEqual(10, rect.x)
+        self.assertEqual(20, rect.y)
+        self.assertEqual(10, rect.coordinates.x)
+        self.assertEqual(20, rect.coordinates.y)
+
+    def test_rectangle_can_be_positioned_relatively(self):
+        """A Rectangle can be repositioned using a relative position."""
+        rect = Rectangle(1, 2, 3, 4)
+        rect.move_by((10, 20))
+
+        self.assertEqual(11, rect.x)
+        self.assertEqual(22, rect.y)
+        self.assertEqual(11, rect.coordinates.x)
+        self.assertEqual(22, rect.coordinates.y)

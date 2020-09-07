@@ -1,5 +1,5 @@
 from engine import audio, camera, disk, easing, factory, geometry, game_object
-from engine import graphics, key_handler, physics, room, tiled_editor, world
+from engine import graphics, key_handler, room, tiled_editor, world
 import pyglet.app
 import pyglet.gl
 import player
@@ -17,25 +17,39 @@ graphics_director = graphics.GraphicsController(
     title="Pickle's Fetch Quest")
 key_handler = key_handler.KeyHandler(graphics_director)
 game_world = world.World2d()
+
 game_world_debugger = world.World2dDebug(game_world)
+fps_display = pyglet.window.FPSDisplay(window=graphics_director._window)
+fps_display.label.color = (255, 255, 255, 255)
+fps_display.label.y = game_height * game_scale - 20
+fps_display.label.bold = False
+fps_display.label.font_size = 10
+fps_display.label.font_name = 'Verdana'
 
 audio_director.attenuation_distance = 40
 
 collision_sound = audio_director.load(
     'audio/sfx/bass-drum-hit.wav', streaming=False)
 
-(pickle, pickle_graphics) = player.create_player(key_handler)
+(pickle, pickle_graphics_idle) = player.create_player(key_handler)
 
 graphics_director.add_listeners(on_update=pickle.update)
 game_world.add_collider(pickle)
 
 
+def toggle_debug_state():
+    global debug_state
+    debug_state = not debug_state
+
+
+debug_state = True
+key_handler.on_key_press(pyglet.window.key.D, toggle_debug_state)
+
+
 def create_floor_physics(**kwargs):
     x, y, width, height = (kwargs[k] for k in ('x', 'y', 'width', 'height'))
 
-    physics_object = physics.Physics2d(mass=9999, gravity=(0, 0))
-    floor_states = {'default': geometry.Rectangle(x, y, width, height)}
-    tile = game_object.GameObject(floor_states, x, y, physics_object)
+    tile = game_object.ImmovableGameObject(x, y, width, height)
 
     def play_collision_audio(other):
         collision_sound.play()
@@ -51,8 +65,8 @@ def create_floor_physics(**kwargs):
 def position_player(**kwargs):
     x, y, batch = (kwargs[k] for k in ('x', 'y', 'batch'))
     pickle.set_position((x, y))
-    pickle_graphics.batch = batch
-    return pickle_graphics
+    pickle_graphics_idle.batch = batch
+    return pickle_graphics_idle
 
 
 # Create factory to convert TMX object names into game objects
@@ -83,12 +97,15 @@ def on_update(dt):
 
 graphics_director.add_listeners(on_update=on_update)
 
+
 @graphics_director._window.event
 def on_draw():
     graphics_director._window.clear()
     camera.attach()
     entry_room.draw()
-    game_world_debugger.draw()
+    if debug_state:
+        game_world_debugger.draw()
+        fps_display.draw()
     camera.detach()
 
 

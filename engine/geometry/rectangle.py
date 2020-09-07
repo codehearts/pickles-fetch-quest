@@ -13,7 +13,7 @@ class Rectangle(object):
         height (int): The height of the rectangle.
     """
 
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, *args, **kwargs):
         """Creates a new rectangle.
 
         Args:
@@ -22,10 +22,27 @@ class Rectangle(object):
             width (int): The width of the rectangle.
             height (int): The height of the rectangle.
         """
-        super(Rectangle, self).__init__()
+        super(Rectangle, self).__init__(*args, **kwargs)
         self._coordinates = Point2d(x, y)
         self.width = width
         self.height = height
+
+    def move_by(self, relative_positions):
+        """Moves the rectangle by the given relative x and y positions.
+
+        Args:
+            relative_positions (tuple of int):
+                The amount to increase the x and y positions by.
+        """
+        self._coordinates += relative_positions
+
+    def set_position(self, coordinates):
+        """Sets the x and y coordinates of the rectangle at the same time.
+
+        Args:
+            coordinates (tuple of int): A tuple of the x and y coordinates.
+        """
+        self._coordinates.set(coordinates)
 
     @property
     def coordinates(self):

@@ -11,9 +11,9 @@ class EventDispatcher(pyglet.event.EventDispatcher):
     a :cls:`EventException` will be raised.
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Creates a new object which can dispatch events to its listeners."""
-        super(EventDispatcher, self).__init__()
+        super(EventDispatcher, self).__init__(*args, **kwargs)
 
     def register_event(self, name):
         """Registers an event name with the dispatch system.
