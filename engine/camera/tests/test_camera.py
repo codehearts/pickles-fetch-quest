@@ -43,7 +43,7 @@ class TestCamera(unittest.TestCase):
         """Updating the camera eases to the center of the followed object."""
         # Create an object in the center of the camera
         target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
-                      physics=Mock(velocity=Point2d(0, 0)))
+                      velocity=Point2d(0, 0))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_easing = Mock(value=Point2d(50, 25))
@@ -75,7 +75,7 @@ class TestCamera(unittest.TestCase):
         # Create an object in the center of the camera
         lead = 123
         target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
-                      physics=Mock(velocity=Point2d(0, 0)))
+                      velocity=Point2d(0, 0))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_lead = Point2d(lead, 0)
@@ -87,7 +87,7 @@ class TestCamera(unittest.TestCase):
             Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (75, 25)
-        target.physics.velocity.x = 10  # x velocity will be a positive value
+        target.velocity.x = 10  # x velocity will be a positive value
         target.center = Point2d(75, 25)
         camera.update(1)
 
@@ -100,7 +100,7 @@ class TestCamera(unittest.TestCase):
         # Create an object in the center of the camera
         lead = 123
         target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
-                      physics=Mock(velocity=Point2d(0, 0)))
+                      velocity=Point2d(0, 0))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_lead = Point2d(lead, 0)
@@ -112,7 +112,7 @@ class TestCamera(unittest.TestCase):
             Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (25, 25)
-        target.physics.velocity.x = -10  # x velocity will be a negative value
+        target.velocity.x = -10  # x velocity will be a negative value
         target.center = Point2d(25, 25)
         camera.update(1)
 
@@ -125,7 +125,7 @@ class TestCamera(unittest.TestCase):
         # Create an object in the center of the camera
         lead = 123
         target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
-                      physics=Mock(velocity=Point2d(0, 0)))
+                      velocity=Point2d(0, 0))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_lead = Point2d(0, lead)
@@ -137,7 +137,7 @@ class TestCamera(unittest.TestCase):
             Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (50, 50)
-        target.physics.velocity.y = 10  # y velocity will be a positive value
+        target.velocity.y = 10  # y velocity will be a positive value
         target.center = Point2d(50, 50)
         camera.update(1)
 
@@ -150,7 +150,7 @@ class TestCamera(unittest.TestCase):
         # Create an object in the center of the camera
         lead = 123
         target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
-                      physics=Mock(velocity=Point2d(0, 0)))
+                      velocity=Point2d(0, 0))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_lead = Point2d(0, lead)
@@ -162,7 +162,7 @@ class TestCamera(unittest.TestCase):
             Point2d(50, 25), Point2d(50, 25))
 
         # Move the object to be centered at (50, 0)
-        target.physics.velocity.y = -10  # y velocity will be a negative value
+        target.velocity.y = -10  # y velocity will be a negative value
         target.center = Point2d(50, 0)
         camera.update(1)
 
@@ -174,34 +174,34 @@ class TestCamera(unittest.TestCase):
         """A camera does not move when a followed object is in the deadzone."""
         # Create an object in the center of the camera
         target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
-                      physics=Mock(velocity=Point2d(0, 0)))
+                      velocity=Point2d(0, 0))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_easing = Mock(value=Point2d(50, 25))
         camera.follow_deadzone = Mock(x=10, y=5, width=80, height=40)
 
         # Target moves right within deadzone
-        target.physics.velocity.x = 10
+        target.velocity.x = 10
         target.center = Point2d(75, 25)
         target.x = 65
         camera.update(1)
 
         # Target moves left within deadzone
-        target.physics.velocity.x = -10
+        target.velocity.x = -10
         target.center = Point2d(50, 25)
         target.x = 40
         camera.update(1)
 
         # Target moves up within deadzone
-        target.physics.velocity.y = 10
-        target.physics.velocity.x = 0
+        target.velocity.y = 10
+        target.velocity.x = 0
         target.center = Point2d(50, 35)
         target.y = 30
         camera.update(1)
 
         # Target moves down within deadzone, even with lead
         camera.follow_lead = Point2d(0, 100)
-        target.physics.velocity.y = -10
+        target.velocity.y = -10
         target.center = Point2d(50, 25)
         target.y = 20
         camera.update(1)
@@ -214,14 +214,14 @@ class TestCamera(unittest.TestCase):
         """A camera only moves once the followed object leaves the deadzone."""
         # Create an object in the center of the camera
         target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
-                      physics=Mock(velocity=Point2d(0, 0)))
+                      velocity=Point2d(0, 0))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_easing = Mock(value=Point2d(50, 25))
         camera.follow_deadzone = Mock(x=10, y=5, width=80, height=40)
 
         # Target moves right within deadzone
-        target.physics.velocity.x = 10
+        target.velocity.x = 10
         target.center = Point2d(99, 25)
         target.x = 89
         camera.update(1)
@@ -232,13 +232,13 @@ class TestCamera(unittest.TestCase):
         camera.update(1)
 
         # Rest within the deadzone to reapply it
-        target.physics.velocity.x = 0
+        target.velocity.x = 0
         target.center = Point2d(50, 25)
         target.x = 40
         camera.update(1)
 
         # Target moves left within deadzone
-        target.physics.velocity.x = -10
+        target.velocity.x = -10
         target.center = Point2d(1, 25)
         target.x = -9
         camera.update(1)
@@ -249,13 +249,13 @@ class TestCamera(unittest.TestCase):
         camera.update(1)
 
         # Rest within the deadzone to reapply it
-        target.physics.velocity.x = 0
+        target.velocity.x = 0
         target.center = Point2d(50, 25)
         target.x = 40
         camera.update(1)
 
         # Target moves up within deadzone
-        target.physics.velocity.y = 10
+        target.velocity.y = 10
         target.center = Point2d(50, 49)
         target.y = 44
         camera.update(1)
@@ -266,13 +266,13 @@ class TestCamera(unittest.TestCase):
         camera.update(1)
 
         # Rest within the deadzone to reapply it
-        target.physics.velocity.y = 0
+        target.velocity.y = 0
         target.center = Point2d(50, 25)
         target.y = 20
         camera.update(1)
 
         # Target moves down within deadzone
-        target.physics.velocity.y = -10
+        target.velocity.y = -10
         target.center = Point2d(50, 1)
         target.y = -4
         camera.update(1)

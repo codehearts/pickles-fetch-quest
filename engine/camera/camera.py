@@ -3,7 +3,7 @@ from pyglet import gl
 
 
 class Camera(Rectangle):
-    """Camera for controlling zoom and tracking game objects.
+    """Camera for controlling zoom and tracking physical game objects.
 
     When following a target, the camera can be provided an easing function,
     lead spacing, and a deadzone to fine-tune the tracking. This is based on
@@ -18,7 +18,7 @@ class Camera(Rectangle):
         width (int): The width of the camera.
         height (int): The height of the camera.
         scale (float): The scaling to apply to the visible scene.
-        follow (:obj:`game_object.GameObject` or None):
+        follow (:obj:`game_object.PhysicalGameObject` or None):
             A target for the camera to follow, or None for manual control.
         follow_easing (:obj:`easing.EasingCurve` or None):
             An easing curve to apply when following a target
@@ -142,10 +142,7 @@ class Camera(Rectangle):
             `(-1, 1)` for an object moving left and up, or `(0, 0)` for an
             object at rest.
         """
-        if self.follow.physics is None:
-            return Point2d(0, 0)
-
-        velocity = self.follow.physics.velocity
+        velocity = self.follow.velocity
         return Point2d(
             min(1, max(-1, velocity.x)),
             min(1, max(-1, velocity.y)))
@@ -172,11 +169,11 @@ class Camera(Rectangle):
     def _center_with_deadzone(self, target, target_vector, axis):
         """Centers on a target with respect to the camera's deadzone.
 
-        This avoids moving the camera when an target is within the deadzone
+        This avoids moving the camera when a target is within the deadzone
         and has not left it.
 
         Args:
-            target (:obj:`game_object.GameObject`):
+            target (:obj:`geometry.Rectangle`):
                 Target to center on with respect to the deadzone.
             target_vector (:obj:`geometry.Point2d`):
                 Vector of the target's movement.
