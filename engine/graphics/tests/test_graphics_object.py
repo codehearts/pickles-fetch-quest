@@ -1,4 +1,5 @@
 from ..graphics_object import GraphicsObject
+from engine.geometry import Point2d
 from unittest.mock import Mock, patch
 import unittest
 
@@ -8,20 +9,17 @@ class TestGraphicsObject(unittest.TestCase):
 
     @patch('pyglet.sprite.Sprite')
     def test_create_graphics_object(self, MockSprite):
-        """Creates a pyglet.sprite.Sprite object using default state."""
-        states = {
-            'default': Mock(),
-            'activated': Mock()
-        }
-        mock_coordinates = Mock(x=400, y=300)
+        """Creates a pyglet.sprite.Sprite object using the graphic."""
+        graphic = Mock()
+        mock_coordinates = Point2d(x=400, y=300)
         kwargs = {
             'batch': Mock(),
             'group': Mock()
         }
 
-        GraphicsObject(mock_coordinates, states, **kwargs)
+        GraphicsObject(graphic, mock_coordinates, **kwargs)
         MockSprite.assert_called_once_with(
-            states['default'], x=400, y=300, **kwargs)
+            graphic, 400, 300, **kwargs)
 
     @patch('pyglet.image.Animation')
     @patch('pyglet.image.atlas.TextureBin')
@@ -38,24 +36,9 @@ class TestGraphicsObject(unittest.TestCase):
             frames[:2], 1, loop=False)
 
     @patch('pyglet.sprite.Sprite')
-    def test_create_graphics_object_without_default_state(self, MockSprite):
-        """KeyError is raised when default display state is omitted."""
-        states = {
-            'activated': Mock()
-        }
-        mock_coordinates = Mock(x=400, y=300)
-        kwargs = {
-            'batch': Mock(),
-            'group': Mock()
-        }
-
-        with self.assertRaises(KeyError):
-            GraphicsObject(mock_coordinates, states, **kwargs)
-
-    @patch('pyglet.sprite.Sprite')
     def test_update(self, MockSprite):
         """Coordinates and scaling are set on pyglet.sprite.Sprite object."""
-        graphic = GraphicsObject(Mock(x=400, y=300), {'default': None})
+        graphic = GraphicsObject(None, (400, 300))
 
         graphic.update(0)
         MockSprite.return_value.update.assert_called_once_with(
@@ -64,12 +47,11 @@ class TestGraphicsObject(unittest.TestCase):
     @patch('pyglet.sprite.Sprite')
     def test_update_sets_coordinates(self, MockSprite):
         """Coordinates are updated to new values."""
-        mock_coordinates = Mock(x=12, y=34)
-        graphic = GraphicsObject(mock_coordinates, {'default': None})
+        graphic = GraphicsObject(None, Point2d(12, 34))
 
         # Update the coordinates (as if by `set_position`)
-        mock_coordinates.x = 56
-        mock_coordinates.y = 78
+        graphic.coordinates.x = 56
+        graphic.coordinates.y = 78
 
         graphic.update(0)
         MockSprite.return_value.update.assert_called_once_with(
@@ -78,7 +60,7 @@ class TestGraphicsObject(unittest.TestCase):
     @patch('pyglet.sprite.Sprite')
     def test_update_sets_positive_scaling(self, MockSprite):
         """Positive scaling is updated to new values."""
-        graphic = GraphicsObject(Mock(x=0, y=0), {'default': None})
+        graphic = GraphicsObject(None)
 
         graphic.scale_x(2)
         graphic.scale_y(3)
@@ -90,7 +72,7 @@ class TestGraphicsObject(unittest.TestCase):
     @patch('pyglet.sprite.Sprite')
     def test_update_sets_negative_scaling_with_offset(self, MockSprite):
         """Negative scaling is updated to new values with offsets."""
-        graphic = GraphicsObject(Mock(x=0, y=0), {'default': None})
+        graphic = GraphicsObject(None)
 
         # Set sprite dimensions for negative scaling offset
         MockSprite.return_value.width = 10
@@ -111,18 +93,15 @@ class TestGraphicsObject(unittest.TestCase):
     @patch('pyglet.sprite.Sprite')
     def test_set_coordinates(self, MockSprite):
         """Coordinates are stored internally and publicly accessible."""
-        mock_coordinates = Mock(x=0, y=0)
-        graphic = GraphicsObject(mock_coordinates, {'default': None})
-
+        graphic = GraphicsObject(None, Point2d(0, 0))
         graphic.set_position((400, 300))
-        mock_coordinates.set.assert_called_once_with((400, 300))
 
-        self.assertEqual(mock_coordinates, graphic.coordinates)
+        self.assertEqual((400, 300), graphic.coordinates)
 
     @patch('pyglet.sprite.Sprite')
     def test_reading_batch(self, MockSprite):
         """Batch is read from internal Sprite object."""
-        graphic = GraphicsObject(Mock(x=0, y=0), {'default': None})
+        graphic = GraphicsObject(None)
 
         self.assertEqual(MockSprite().batch, graphic.batch)
 
@@ -130,7 +109,7 @@ class TestGraphicsObject(unittest.TestCase):
     def test_setting_batch(self, MockSprite):
         """Batch is set on internal Sprite object."""
         mock_batch = Mock()
-        graphic = GraphicsObject(Mock(x=0, y=0), {'default': None})
+        graphic = GraphicsObject(None)
         graphic.batch = mock_batch
 
         self.assertEqual(mock_batch, graphic.batch)
