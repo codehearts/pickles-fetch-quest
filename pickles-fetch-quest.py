@@ -17,7 +17,14 @@ graphics_director = graphics.GraphicsController(
     title="Pickle's Fetch Quest")
 key_handler = key_handler.KeyHandler(graphics_director)
 game_world = world.World2d()
+
 game_world_debugger = world.World2dDebug(game_world)
+fps_display = pyglet.window.FPSDisplay(window=graphics_director._window)
+fps_display.label.color = (255, 255, 255, 255)
+fps_display.label.y = game_height * game_scale - 20
+fps_display.label.bold = False
+fps_display.label.font_size = 10
+fps_display.label.font_name = 'Verdana'
 
 audio_director.attenuation_distance = 40
 
@@ -98,6 +105,7 @@ def on_draw():
     entry_room.draw()
     if debug_state:
         game_world_debugger.draw()
+        fps_display.draw()
     camera.detach()
 
 
