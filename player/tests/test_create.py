@@ -18,22 +18,24 @@ class TestCreatePlayer(unittest.TestCase):
 
     @patch('player.create.PlatformerController')
     @patch('engine.graphics.GraphicsObject')
-    @patch('engine.game_object.GameObject')
+    @patch('engine.game_object.PhysicalGameObject')
     @patch('engine.disk.DiskLoader')
-    def test_adds_graphics_and_collision_listeners(self, mock_disk,
-                                                   mock_game_object,
-                                                   mock_graphics,
-                                                   mock_controller):
-        """Graphic updates and collision processing listeners are added."""
+    def test_adds_attachments_and_collision_listeners(self, mock_disk,
+                                                      mock_game_object,
+                                                      mock_graphics,
+                                                      mock_controller):
+        """Graphic attachments and collision processing listeners are added."""
         create_player(Mock())
 
-        mock_game_object.return_value.add_listeners.assert_has_calls([
-            call(on_move=mock_graphics.return_value.set_position),
-            call(on_collider_enter=mock_controller().process_collision)])
+        mock_game_object.return_value.add_listeners.assert_called_once_with(
+            on_collider_enter=mock_controller().process_collision)
+
+        mock_game_object.return_value.attach.assert_called_once_with(
+            mock_graphics.return_value, (0, -1))
 
     @patch('player.create.PlatformerController')
     @patch('engine.graphics.GraphicsObject')
-    @patch('engine.game_object.GameObject')
+    @patch('engine.game_object.PhysicalGameObject')
     @patch('engine.disk.DiskLoader')
     def test_registers_keys_for_walking(self, mock_disk, mock_game_object,
                                         mock_graphics, mock_controller):
@@ -51,7 +53,7 @@ class TestCreatePlayer(unittest.TestCase):
 
     @patch('player.create.PlatformerController')
     @patch('engine.graphics.GraphicsObject')
-    @patch('engine.game_object.GameObject')
+    @patch('engine.game_object.PhysicalGameObject')
     @patch('engine.disk.DiskLoader')
     def test_registers_keys_for_jumping(self, mock_disk, mock_game_object,
                                         mock_graphics, mock_controller):
@@ -67,11 +69,10 @@ class TestCreatePlayer(unittest.TestCase):
 
     @patch('player.create.PlatformerController')
     @patch('engine.graphics.GraphicsObject')
-    @patch('engine.game_object.GameObject')
+    @patch('engine.game_object.PhysicalGameObject')
     @patch('engine.disk.DiskLoader')
-    def test_returns_game_object_and_graphics(self, mock_disk,
-                                              mock_game_object, mock_graphics,
-                                              mock_controller):
+    def test_returns_collider_and_graphics(self, mock_disk, mock_game_object,
+                                           mock_graphics, mock_controller):
         """Both the game object and graphics are returned."""
         self.assertEqual(
             (mock_game_object.return_value, mock_graphics.return_value),
