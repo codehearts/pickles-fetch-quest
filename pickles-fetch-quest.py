@@ -30,6 +30,15 @@ graphics_director.add_listeners(on_update=pickle.update)
 game_world.add_collider(pickle)
 
 
+def toggle_debug_state():
+    global debug_state
+    debug_state = not debug_state
+
+
+debug_state = True
+key_handler.on_key_press(pyglet.window.key.D, toggle_debug_state)
+
+
 def create_floor_physics(**kwargs):
     x, y, width, height = (kwargs[k] for k in ('x', 'y', 'width', 'height'))
 
@@ -87,7 +96,8 @@ def on_draw():
     graphics_director._window.clear()
     camera.attach()
     entry_room.draw()
-    game_world_debugger.draw()
+    if debug_state:
+        game_world_debugger.draw()
     camera.detach()
 
 
