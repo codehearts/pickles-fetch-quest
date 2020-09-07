@@ -6,6 +6,8 @@ class Physics2d(object):
     """Simple two dimensional physics simulation.
 
     Attributes:
+        mass (int):
+            Mass of the object in arbitrary units.
         velocity (:obj:`engine.geometry.Point2d`):
             Velocity along the x and y axes in units per second.
         acceleration (:obj:`engine.geometry.Point2d`):
@@ -48,37 +50,58 @@ class Physics2d(object):
         """
         # Calculate the total acceleration as force applied plus gravity
         total_acceleration = (self.acceleration + self._gravity)
-        friction = 100 - self.friction
 
         for axis in ('x', 'y'):
-            velocity = getattr(self.velocity, axis)
-            velocity_1000 = getattr(self._velocity_1000, axis)
-
-            # Ensure high resolution velocity matches the current velocity
-            if divide_toward_zero(velocity_1000, 1000) != velocity:
-                setattr(self._velocity_1000, axis, velocity * 1000)
-
-            # Apply friction to decelerate when no acceleration is present
-            if getattr(total_acceleration, axis) == 0:
-                setattr(self._velocity_1000, axis,
-                        divide_toward_zero(velocity_1000 * friction, 100))
+            total_axis_acceleration = getattr(total_acceleration, axis)
+            self._update_acceleration_on_axis(total_axis_acceleration, axis)
 
         # Update velocity based on acceleration, mass, and time
         self._velocity_1000 += (total_acceleration * self.mass * ms)
 
         for axis in ('x', 'y'):
-            velocity_1000 = getattr(self._velocity_1000, axis)
+            self._update_velocity_on_axis(axis)
 
-            # Round off the integer velocity towards 0
-            setattr(self.velocity, axis,
-                    divide_toward_zero(velocity_1000, 1000))
+    def _update_acceleration_on_axis(self, total_acceleration, axis):
+        """Updates acceleration on the given axis.
 
-            velocity = getattr(self.velocity, axis)
-            terminal_velocity = getattr(self._terminal_velocity, axis)
+        Args:
+            total_acceleration (int):
+                Total acceleration on the axis, as force applied plus gravity.
+            axis (str):
+                Axis to update acceleration for, either 'x' or 'y'.
+        """
+        friction = 100 - self.friction
+        velocity = getattr(self.velocity, axis)
+        velocity_1000 = getattr(self._velocity_1000, axis)
 
-            # Apply terminal velocity
-            if abs(velocity) > terminal_velocity:
-                if velocity < 0:
-                    terminal_velocity = -terminal_velocity
+        # Ensure high resolution velocity matches the current velocity
+        if divide_toward_zero(velocity_1000, 1000) != velocity:
+            setattr(self._velocity_1000, axis, velocity * 1000)
 
-                setattr(self.velocity, axis, terminal_velocity)
+        # Apply friction to decelerate when no acceleration is present
+        if total_acceleration == 0:
+            setattr(self._velocity_1000, axis,
+                    divide_toward_zero(velocity_1000 * friction, 100))
+
+    def _update_velocity_on_axis(self, axis):
+        """Updates velocity on the given axis by applying acceleration.
+
+        Args:
+            axis (str):
+                Axis to update acceleration for, either 'x' or 'y'.
+        """
+        velocity_1000 = getattr(self._velocity_1000, axis)
+
+        # Round off the integer velocity towards 0
+        setattr(self.velocity, axis,
+                divide_toward_zero(velocity_1000, 1000))
+
+        velocity = getattr(self.velocity, axis)
+        terminal_velocity = getattr(self._terminal_velocity, axis)
+
+        # Apply terminal velocity
+        if abs(velocity) > terminal_velocity:
+            if velocity < 0:
+                terminal_velocity = -terminal_velocity
+
+            setattr(self.velocity, axis, terminal_velocity)
