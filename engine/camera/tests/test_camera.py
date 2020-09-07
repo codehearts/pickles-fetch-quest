@@ -21,6 +21,15 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(50, camera.x, 'Camera is not horizontally centered')
         self.assertEqual(25, camera.y, 'Camera is not vertically centered')
 
+    def test_update_does_nothing_when_nothing_is_followed(self):
+        """Updating the camera does nothing when not following an object."""
+        # Create an object in the center of the camera
+        camera = Camera(100, 50)
+        camera.update(123)
+
+        self.assertEqual(0, camera.x, 'Horizonal movement without follow')
+        self.assertEqual(0, camera.y, 'Vertical movement without follow')
+
     def test_update_centers_on_followed_object(self):
         """Updating the camera centers it on the followed object."""
         # Create an object in the center of the camera
@@ -173,12 +182,15 @@ class TestCamera(unittest.TestCase):
     def test_camera_does_not_move_with_object_in_deadzone(self):
         """A camera does not move when a followed object is in the deadzone."""
         # Create an object in the center of the camera
+        mock_deadzone = Mock(x=10, y=5, width=80, height=40)
         target = Mock(x=40, y=20, width=20, height=10, center=Point2d(50, 25),
                       velocity=Point2d(0, 0))
         camera = Camera(100, 50)
         camera.follow = target
         camera.follow_easing = Mock(value=Point2d(50, 25))
-        camera.follow_deadzone = Mock(x=10, y=5, width=80, height=40)
+        camera.follow_deadzone = mock_deadzone
+
+        self.assertEqual(mock_deadzone, camera.follow_deadzone)
 
         # Target moves right within deadzone
         target.velocity.x = 10

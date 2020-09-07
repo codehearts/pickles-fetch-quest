@@ -57,5 +57,5 @@ coverage report -m --skip-covered --include=./* # Report files without 100% cove
 [coverage-link]:  https://codecov.io/gh/codehearts/pickles-fetch-quest
 [health-badge]:   https://api.codeclimate.com/v1/badges/d43c91516157f1c02dd0/maintainability
 [health-link]:    https://codeclimate.com/github/codehearts/pickles-fetch-quest/maintainability
-[build-badge]:    https://travis-ci.org/codehearts/pickles-fetch-quest.svg?branch=master
-[build-link]:     https://travis-ci.org/codehearts/pickles-fetch-quest
+[build-badge]:    https://travis-ci.com/codehearts/pickles-fetch-quest.svg?branch=master
+[build-link]:     https://travis-ci.com/codehearts/pickles-fetch-quest
