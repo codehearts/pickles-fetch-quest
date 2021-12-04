@@ -1,0 +1,25 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.8.5'
+        cache: 'pip'
+    - run: sudo apt-get -q update && sudo apt-get install -y --no-install-recommends freeglut3-dev
+    - run: pip install -r requirements-dev.txt
+    - run: coverage run -m unittest
+      env:
+        PYGLET_SHADOW_WINDOW: 'False'
+        PYGLET_DEBUG_GL: 'False'
+        PYGLET_AUDIO: 'silent'
+    - uses: codecov/codecov-action@v2
