@@ -22,4 +22,4 @@ jobs:
         PYGLET_SHADOW_WINDOW: 'False'
         PYGLET_DEBUG_GL: 'False'
         PYGLET_AUDIO: 'silent'
-    - uses: codecov/codecov-action@v2
+    - uses: codecov/codecov-action@v3
