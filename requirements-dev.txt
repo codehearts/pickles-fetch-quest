@@ -1,4 +1,4 @@
 # Includes base requirements as well as dev requirements
 -r requirements.txt
-flake8==3.8.3
+flake8==7.0.0
 codecov==2.1.9
